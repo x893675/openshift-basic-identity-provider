@@ -21,6 +21,7 @@ import (
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("%s", err)
@@ -38,8 +39,12 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//log.Printf("%s--%s", result["username"], result["password"])
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	execStatus, err := w.Write(helper.MarshaUp(userinfo))
+	if err != nil {
+		w.WriteHeader(execStatus)
+		// ignore error
+		_, _ = w.Write(helper.MarshaUp(err))
+	}
 	w.WriteHeader(http.StatusOK)
 }
 
