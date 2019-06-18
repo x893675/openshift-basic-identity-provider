@@ -8,8 +8,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var user_cols = []string{"username", "password", "email", "name"}
-
 var db_path = new(string)
 
 var db_driver *sql.DB
@@ -45,6 +43,24 @@ func InitDB() {
 }
 
 func Insert(userinfo User) error {
+	tx, err := db_driver.Begin()
+	if err != nil {
+		return err
+		//log.Fatal(err)
+	}
+	stmt, err := tx.Prepare("insert into user(username,password,email,name) values(?, ?, ?, ?)")
+	if err != nil {
+		return err
+		//log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(userinfo.Username, userinfo.Password, userinfo.Email, userinfo.Name)
+	if err != nil {
+		return err
+	}
+
+	tx.Commit()
 	return nil
 }
 
