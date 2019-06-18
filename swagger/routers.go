@@ -52,63 +52,49 @@ var routes = Routes{
 	Route{
 		"Index",
 		"GET",
-		"/x893675/openshift-basic-identity-provider/1.0.0/",
+		"/openshift-basic-identity-provider/1.0.0/",
 		Index,
 	},
 
 	Route{
 		"CreateUser",
 		strings.ToUpper("Post"),
-		"/x893675/openshift-basic-identity-provider/1.0.0/user",
+		"/openshift-basic-identity-provider/1.0.0/user",
 		CreateUser,
 	},
 
 	Route{
 		"DeleteUser",
 		strings.ToUpper("Delete"),
-		"/x893675/openshift-basic-identity-provider/1.0.0/user/{username}",
+		"/openshift-basic-identity-provider/1.0.0/user/{username}",
 		DeleteUser,
 	},
 
 	Route{
 		"GetUserByName",
 		strings.ToUpper("Get"),
-		"/x893675/openshift-basic-identity-provider/1.0.0/user/{username}",
+		"/openshift-basic-identity-provider/1.0.0/user/{username}",
 		GetUserByName,
 	},
 
 	Route{
 		"ListUsers",
 		strings.ToUpper("Get"),
-		"/x893675/openshift-basic-identity-provider/1.0.0/users",
+		"/openshift-basic-identity-provider/1.0.0/users",
 		ListUsers,
 	},
 
 	Route{
 		"Login",
 		strings.ToUpper("Post"),
-		"/x893675/openshift-basic-identity-provider/1.0.0/auth/token",
+		"/openshift-basic-identity-provider/1.0.0/auth/token",
 		Login,
 	},
 
 	Route{
 		"UpdateUser",
 		strings.ToUpper("Put"),
-		"/x893675/openshift-basic-identity-provider/1.0.0/user/{username}",
-		UpdateUser,
-	},
-
-	Route{
-		"Login",
-		strings.ToUpper("Post"),
-		"/x893675/openshift-basic-identity-provider/1.0.0/auth/token",
-		Login,
-	},
-
-	Route{
-		"UpdateUser",
-		strings.ToUpper("Put"),
-		"/x893675/openshift-basic-identity-provider/1.0.0/user/{username}",
+		"/openshift-basic-identity-provider/1.0.0/user/{username}",
 		UpdateUser,
 	},
 }

@@ -21,7 +21,7 @@ import (
 	//
 	//    sw "github.com/myname/myrepo/go"
 	//
-	sw "openshift-basic-identiry/swagger"
+	sw "openshift-basic-identity-provider/swagger"
 )
 
 func main() {
