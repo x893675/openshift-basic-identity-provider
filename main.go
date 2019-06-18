@@ -21,6 +21,7 @@ import (
 	//
 	//    sw "github.com/myname/myrepo/go"
 	//
+	"openshift-basic-identity-provider/db"
 	sw "openshift-basic-identity-provider/swagger"
 )
 
@@ -28,6 +29,8 @@ func main() {
 	log.Printf("Server started")
 
 	router := sw.NewRouter()
+
+	db.InitDB()
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
