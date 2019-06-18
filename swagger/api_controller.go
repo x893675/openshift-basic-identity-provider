@@ -15,6 +15,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"openshift-basic-identity-provider/db"
 	"openshift-basic-identity-provider/helper"
 )
 
@@ -28,7 +29,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	bodyString := string(bodyBytes)
 	//var result map[string]interface{}
-	var userinfo User
+	var userinfo db.User
 	helper.UnmarshaUp(bodyString, &userinfo)
 	fmt.Println(userinfo)
 	//log.Printf("%s--%s", result["username"], result["password"])

@@ -44,16 +44,11 @@ func InitDB() {
 	// }
 }
 
-func Insert(userinfo map[string]string) error {
-	for _, v := range user_cols {
-		if _, ok := userinfo[v]; ok {
-
-		}
-	}
+func Insert(userinfo User) error {
 	return nil
 }
 
-func Update(userinfo map[string]string) error {
+func Update(userinfo User) error {
 	return nil
 }
 
