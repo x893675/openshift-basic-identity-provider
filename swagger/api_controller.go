@@ -11,6 +11,7 @@
 package swagger
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -26,9 +27,11 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	bodyString := string(bodyBytes)
-	var result map[string]interface{}
-	helper.UnmarshaUp(bodyString, &result)
-	log.Printf("%s--%s", result["username"], result["password"])
+	//var result map[string]interface{}
+	var userinfo User
+	helper.UnmarshaUp(bodyString, &userinfo)
+	fmt.Println(userinfo)
+	//log.Printf("%s--%s", result["username"], result["password"])
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 }

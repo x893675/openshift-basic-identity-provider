@@ -8,6 +8,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var user_cols = []string{"username", "password", "email", "name"}
+
 var db_path = new(string)
 
 var db_driver *sql.DB
@@ -40,6 +42,23 @@ func InitDB() {
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
+}
+
+func Insert(userinfo map[string]string) error {
+	for _, v := range user_cols {
+		if _, ok := userinfo[v]; ok {
+
+		}
+	}
+	return nil
+}
+
+func Update(userinfo map[string]string) error {
+	return nil
+}
+
+func Delete(user string) error {
+	return nil
 }
 
 func CloseDB() {
