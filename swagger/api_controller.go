@@ -39,13 +39,27 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	w.WriteHeader(http.StatusOK)
 	execStatus, err := w.Write(helper.MarshaUp(userinfo))
 	if err != nil {
 		w.WriteHeader(execStatus)
 		// ignore error
 		_, _ = w.Write(helper.MarshaUp(err))
+		return
 	}
-	w.WriteHeader(http.StatusOK)
+	defer func(){
+    err := recover()
+    if err != nil {
+        fmt.Println("Internal error:", err)
+        var err_str string
+        var ok bool
+        if err_str, ok = err.(string); !ok {
+            err_str = "We encountered an internal error"
+        }
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write([]byte(err_str))
+    }
+}()
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
