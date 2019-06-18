@@ -1,0 +1,238 @@
+---
+swagger: "2.0"
+info:
+  description: "openshift basic identity provider"
+  version: "1.0.0"
+  title: "openshift basic identity"
+  contact:
+    email: "zhu.xiaowei@99cloud.net"
+host: "virtserver.swaggerhub.com"
+basePath: "/x893675/openshift-basic-identity-provider/1.0.0"
+tags:
+- name: "admins"
+  description: "Secured Admin-only calls"
+- name: "developers"
+  description: "Operations available to regular developers"
+schemes:
+- "https"
+- "http"
+paths:
+  /auth/token:
+    post:
+      tags:
+      - "admins"
+      - "developers"
+      summary: "Login validate"
+      description: "login validate"
+      operationId: "login"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "user"
+        description: "user name is sent to this service"
+        required: false
+        schema:
+          $ref: "#/definitions/User"
+        x-exportParamName: "User"
+      responses:
+        200:
+          description: "A user object"
+          schema:
+            $ref: "#/definitions/User"
+        401:
+          description: "Authentication Failed"
+          schema:
+            type: "object"
+            properties:
+              error:
+                type: "string"
+                format: "uuid"
+                description: "Authentication failed"
+        403:
+          description: "Internal error"
+          schema:
+            type: "object"
+            properties:
+              error:
+                type: "string"
+                format: "uuid"
+                description: "Internal error"
+  /users:
+    get:
+      tags:
+      - "admins"
+      summary: "list all user"
+      description: "list all user"
+      operationId: "listUsers"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "query"
+        description: "query user for id"
+        required: false
+        type: "string"
+        x-exportParamName: "Id"
+        x-optionalDataType: "String"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/User"
+        400:
+          description: "Invalid username supplied"
+        404:
+          description: "User not found"
+  /user/{username}:
+    get:
+      tags:
+      - "admins"
+      summary: "Get user by user name"
+      operationId: "getUserByName"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "username"
+        in: "path"
+        description: "The name that needs to be fetched. Use user1 for testing."
+        required: true
+        type: "string"
+        x-exportParamName: "Username"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/User"
+        400:
+          description: "Invalid username supplied"
+        404:
+          description: "User not found"
+    put:
+      tags:
+      - "admins"
+      - "developers"
+      summary: "Updated user"
+      description: "This can only be done by the logged in user."
+      operationId: "updateUser"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "username"
+        in: "path"
+        description: "name that need to be updated"
+        required: true
+        type: "string"
+        x-exportParamName: "Username"
+      - in: "body"
+        name: "body"
+        description: "Updated user object"
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+        x-exportParamName: "Body"
+      responses:
+        400:
+          description: "Invalid user supplied"
+        404:
+          description: "User not found"
+    delete:
+      tags:
+      - "admins"
+      summary: "Delete user"
+      description: "This can only be done by the logged in user."
+      operationId: "deleteUser"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "username"
+        in: "path"
+        description: "The name that needs to be deleted"
+        required: true
+        type: "string"
+        x-exportParamName: "Username"
+      responses:
+        400:
+          description: "Invalid username supplied"
+        404:
+          description: "User not found"
+  /user:
+    post:
+      tags:
+      - "admins"
+      summary: "Create user"
+      description: "This can only be done by the logged in user."
+      operationId: "createUser"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Created user object"
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+        x-exportParamName: "Body"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/User"
+        400:
+          description: "Invalid username supplied"
+        404:
+          description: "User not found"
+definitions:
+  User:
+    type: "object"
+    required:
+    - "password"
+    - "username"
+    properties:
+      id:
+        type: "string"
+        example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+      username:
+        type: "string"
+        example: "john"
+      password:
+        type: "string"
+        example: "john"
+      email:
+        type: "string"
+        example: "somebody@gmail.com"
+      sub:
+        type: "string"
+        example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+      name:
+        type: "string"
+        example: "john"
+      preferred_username:
+        type: "string"
+        example: "somebody"
+    example:
+      sub: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+      password: "john"
+      name: "john"
+      id: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+      preferred_username: "somebody"
+      email: "somebody@gmail.com"
+      username: "john"
+  inline_response_401:
+    properties:
+      error:
+        type: "string"
+        format: "uuid"
+        description: "Authentication failed"
+  inline_response_403:
+    properties:
+      error:
+        type: "string"
+        format: "uuid"
+        description: "Internal error"
