@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"strings"
 	"net/http"
 	"openshift-basic-identity-provider/db"
 	"openshift-basic-identity-provider/helper"
@@ -63,6 +64,9 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
+	temp := strings.Split(r.URL.Path, "/")
+	username := temp[len(temp)-1]
+	fmt.Println(username)
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 }
