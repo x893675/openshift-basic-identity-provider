@@ -11,10 +11,24 @@
 package swagger
 
 import (
+	"io/ioutil"
+	"log"
 	"net/http"
+	"openshift-basic-identity-provider/helper"
 )
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
+
+	bodyBytes, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("%s", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	bodyString := string(bodyBytes)
+	var result map[string]interface{}
+	helper.UnmarshaUp(bodyString, &result)
+	log.Printf("%s--%s", result["username"], result["password"])
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 }
