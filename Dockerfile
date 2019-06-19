@@ -4,7 +4,7 @@ COPY . .
 
 ENV DB_PATH=/home/user.db
 
-RUN go build --mod=vendor && go install -v
+RUN cd openshift-basic-identity-provider && go install --mod=vendor -v && cd /go && rm -rf /go/openshift-basic-identity-provider
 
 EXPOSE 8080
 
