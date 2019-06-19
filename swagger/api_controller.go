@@ -14,10 +14,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"strings"
 	"net/http"
 	"openshift-basic-identity-provider/db"
 	"openshift-basic-identity-provider/helper"
+	"strings"
 )
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -48,26 +48,30 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write(helper.MarshaUp(err))
 		return
 	}
-	defer func(){
-    err := recover()
-    if err != nil {
-        fmt.Println("Internal error:", err)
-        var err_str string
-        var ok bool
-        if err_str, ok = err.(string); !ok {
-            err_str = "We encountered an internal error"
-        }
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Write([]byte(err_str))
-    }
-}()
+	defer func() {
+		err := recover()
+		if err != nil {
+			fmt.Println("Internal error:", err)
+			var err_str string
+			var ok bool
+			if err_str, ok = err.(string); !ok {
+				err_str = "We encountered an internal error"
+			}
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err_str))
+		}
+	}()
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	temp := strings.Split(r.URL.Path, "/")
 	username := temp[len(temp)-1]
 	fmt.Println(username)
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	err := db.Delete(username)
+	if err != nil {
+		fmt.Println("todo delete db error")
+	}
 	w.WriteHeader(http.StatusOK)
 }
 
