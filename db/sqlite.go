@@ -27,7 +27,7 @@ func init() {
 
 func InitDB() {
 	var err error
-	db_driver, err = sql.Open("sqlite3", "test.db")
+	db_driver, err = sql.Open("sqlite3", *db_path)
 	if err != nil {
 		log.Fatal(err)
 	}
