@@ -92,6 +92,9 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	temp := strings.Split(r.URL.Path, "/")
+	username := temp[len(temp)-1]
+	fmt.Println(username)
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("%s", err)
@@ -103,7 +106,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	var userinfo db.User
 	helper.UnmarshaUp(bodyString, &userinfo)
 	fmt.Println(userinfo)
-	err = db.Update(userinfo)
+	err = db.Update(username,userinfo)
 	if err != nil {
 		log.Printf("%s", err)
 		w.WriteHeader(http.StatusBadRequest)
