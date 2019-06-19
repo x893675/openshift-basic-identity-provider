@@ -64,7 +64,7 @@ func Insert(userinfo User) error {
 	return nil
 }
 
-func Update(username string,userinfo User) error {
+func Update(username string, userinfo User) error {
 	stmt, err := db_driver.Prepare("update user set username=?,password=?,email=?,name=? where username = ?")
 	if err != nil {
 		return err
@@ -94,8 +94,22 @@ func Delete(username string) error {
 	return nil
 }
 
-func Query() error {
-	return nil
+func Query() ([]User, error) {
+	rows, err := db_driver.Query("SELECT * FROM user")
+	var users []User
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var user User
+		err = rows.Scan(&user.Id, &user.Username, &user.Password, &user.Email, &user.Name)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
 }
 
 func CloseDB() {

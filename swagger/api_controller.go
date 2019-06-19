@@ -82,7 +82,20 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 func ListUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	users, err := db.Query()
+	if err != nil {
+		log.Printf("%s", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
+	execStatus, err := w.Write(helper.MarshaUp(users))
+	if err != nil {
+		w.WriteHeader(execStatus)
+		// ignore error
+		_, _ = w.Write(helper.MarshaUp(err))
+		return
+	}
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -106,7 +119,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	var userinfo db.User
 	helper.UnmarshaUp(bodyString, &userinfo)
 	fmt.Println(userinfo)
-	err = db.Update(username,userinfo)
+	err = db.Update(username, userinfo)
 	if err != nil {
 		log.Printf("%s", err)
 		w.WriteHeader(http.StatusBadRequest)
