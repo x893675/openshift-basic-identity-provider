@@ -15,6 +15,26 @@
   },
   "objects": [
     {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${PVC_NAME}",
+        "annotations": {
+          "volume.beta.kubernetes.io/storage-class": "${STORAGE_CLASS}"
+        }
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests":{
+            "storage": "${PV_SIZE}"
+          }
+        }
+      }
+    },
+    {
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
@@ -147,11 +167,25 @@
               {
                 "name": "openshift-basic-identity-provider",
                 "image": "openshift-basic-identity-provider",
+                "volumeMounts": [
+                  {
+                    "mountPath": "${MOUNT_PATH}",
+                    "name": "${VOLUME_NAME}"
+                  }
+                ],
                 "ports": [
                   {
                     "containerPort": 8080
                   }
                 ]
+              }
+            ],
+            "volumes":[
+              {
+                "persistentVolumeClaim":{
+                  "claimName": "${PVC_NAME}"
+                },
+                "name": "${VOLUME_NAME}"
               }
             ]
           }
@@ -184,6 +218,31 @@
       "description": "Github trigger secret.  A difficult to guess string encoded as part of the webhook URL.  Not encrypted.",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{40}"
+    },
+    {
+      "name": "PVC_NAME",
+      "description": "pvc name",
+      "value": "basic-identity-provider-volume"
+    },
+    {
+      "name": "STORAGE_CLASS",
+      "description": "storage class name",
+      "value": "openstack-sc"
+    },
+    {
+      "name": "PV_SIZE",
+      "description": "pv size",
+      "value": "1Gi"
+    },
+    {
+      "name": "VOLUME_NAME",
+      "description": "container volume name",
+      "value": "volume-db"
+    },
+    {
+      "name": "MOUNT_PATH",
+      "description": "container mount path",
+      "value": "/home"
     }
   ]
 }
