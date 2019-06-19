@@ -100,6 +100,7 @@ func Query() ([]User, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var user User
 		err = rows.Scan(&user.Id, &user.Username, &user.Password, &user.Email, &user.Name)
@@ -110,6 +111,23 @@ func Query() ([]User, error) {
 	}
 
 	return users, nil
+}
+
+func ValidatePassword(username string, password string) (User, error) {
+	stmt, err := db_driver.Prepare("SELECT id, username, email, name  FROM user where username=? AND password=?")
+	var user User
+	if err != nil {
+		return user, err
+	}
+	defer stmt.Close()
+	err = stmt.QueryRow(username, password).Scan(&user.Id, &user.Username, &user.Email, &user.Name)
+	if err == sql.ErrNoRows {
+		return user, err
+	} else if err != nil {
+		return user, err
+	} else {
+		return user, nil
+	}
 }
 
 func CloseDB() {

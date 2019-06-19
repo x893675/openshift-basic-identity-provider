@@ -100,7 +100,30 @@ func ListUsers(w http.ResponseWriter, r *http.Request) {
 
 func Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	bodyBytes, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("%s", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	bodyString := string(bodyBytes)
+	var userinfo db.User
+	helper.UnmarshaUp(bodyString, &userinfo)
+	user, err := db.ValidatePassword(userinfo.Username, userinfo.Password)
+	if err != nil {
+		log.Printf("%s", err)
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write(helper.MarshaUp(err))
+		return
+	}
 	w.WriteHeader(http.StatusOK)
+	execStatus, err := w.Write(helper.MarshaUp(user))
+	if err != nil {
+		w.WriteHeader(execStatus)
+		// ignore error
+		_, _ = w.Write(helper.MarshaUp(err))
+		return
+	}
 }
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
