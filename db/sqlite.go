@@ -65,24 +65,17 @@ func Insert(userinfo User) error {
 }
 
 func Update(userinfo User) error {
-	tx, err := db_driver.Begin()
-	if err != nil {
-		return err
-		//log.Fatal(err)
-	}
-	stmt, err := tx.Prepare("delete from user where username = ?")
+	stmt, err := db_driver.Prepare("update user set (username,password,email,name) values(?,?,?,?) where username = ?")
 	if err != nil {
 		return err
 		//log.Fatal(err)
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(userinfo)
+	_, err = stmt.Exec(userinfo.Username, userinfo.Password, userinfo.Email, userinfo.Name, userinfo.Username)
 	if err != nil {
 		return err
 	}
-
-	tx.Commit()
 	return nil
 }
 
@@ -98,6 +91,10 @@ func Delete(username string) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func Query() error {
 	return nil
 }
 

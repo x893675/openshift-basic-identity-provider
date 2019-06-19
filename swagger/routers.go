@@ -70,12 +70,12 @@ var routes = Routes{
 		DeleteUser,
 	},
 
-	Route{
-		"GetUserByName",
-		strings.ToUpper("Get"),
-		"/openshift-basic-identity-provider/1.0.0/user/{username}",
-		GetUserByName,
-	},
+	// Route{
+	// 	"GetUserByName",
+	// 	strings.ToUpper("Get"),
+	// 	"/openshift-basic-identity-provider/1.0.0/user/{username}",
+	// 	GetUserByName,
+	// },
 
 	Route{
 		"ListUsers",
