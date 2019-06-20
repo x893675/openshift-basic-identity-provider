@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS user(
 
 * update user
 
-  `curl -X PUT "https://yourdomain/openshift-basic-identity-provider/1.0.0/user/john" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"password\": \"john\", \"name\": \"john\", \"email\": \"somebody@gmail.com\", \"username\": \"john\"}"`
+  `curl -X PUT "http://yourdomain/openshift-basic-identity-provider/1.0.0/user/john" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"password\": \"john\", \"name\": \"john\", \"email\": \"somebody@gmail.com\", \"username\": \"john\"}"`
 
 * delete user
 
