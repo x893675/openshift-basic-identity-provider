@@ -125,7 +125,7 @@ func Query() ([]User, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var user User
-		err = rows.Scan(&user.Id, &user.Username, &user.Password, &user.Email, &user.Name)
+		err = rows.Scan(&user.Id, &user.Username, &user.Email, &user.Name)
 		if err != nil {
 			return nil, err
 		}
