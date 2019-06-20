@@ -142,7 +142,7 @@ func ValidatePassword(username string, password string) (User, error) {
 		return user, err
 	}
 	defer stmt.Close()
-	encryptPw := AesEncrypt(username, salt_key)
+	encryptPw := AesEncrypt(password, salt_key)
 	err = stmt.QueryRow(username, encryptPw).Scan(&user.Id, &user.Username, &user.Email, &user.Name)
 	if err == sql.ErrNoRows {
 		return user, err
