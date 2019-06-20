@@ -117,7 +117,7 @@ func Delete(username string) error {
 }
 
 func Query() ([]User, error) {
-	rows, err := db_driver.Query("SELECT * FROM user")
+	rows, err := db_driver.Query("SELECT id,username,email,name FROM user")
 	var users []User
 	if err != nil {
 		return nil, err
