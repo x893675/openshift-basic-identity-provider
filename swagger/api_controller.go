@@ -26,32 +26,32 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("%s", err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusForbidden)
+		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
 	}
 	bodyString := string(bodyBytes)
-	//var result map[string]interface{}
 	var userinfo db.User
 	helper.UnmarshaUp(bodyString, &userinfo)
 	fmt.Println(userinfo)
 	err = db.Insert(userinfo)
 	if err != nil {
 		log.Printf("%s", err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusForbidden)
+		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
 	execStatus, err := w.Write(helper.MarshaUp(userinfo))
 	if err != nil {
 		w.WriteHeader(execStatus)
-		// ignore error
-		_, _ = w.Write(helper.MarshaUp(err))
+		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
 	}
 	defer func() {
 		err := recover()
 		if err != nil {
-			fmt.Println("Internal error:", err)
+			log.Printf("Internal error: %s", err)
 			var err_str string
 			var ok bool
 			if err_str, ok = err.(string); !ok {
@@ -70,7 +70,10 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(username)
 	err := db.Delete(username)
 	if err != nil {
-		fmt.Println("todo delete db error")
+		log.Printf("%s", err)
+		w.WriteHeader(http.StatusForbidden)
+		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
+		return
 	}
 	w.WriteHeader(http.StatusOK)
 }
@@ -85,15 +88,15 @@ func ListUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := db.Query()
 	if err != nil {
 		log.Printf("%s", err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusForbidden)
+		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
 	execStatus, err := w.Write(helper.MarshaUp(users))
 	if err != nil {
 		w.WriteHeader(execStatus)
-		// ignore error
-		_, _ = w.Write(helper.MarshaUp(err))
+		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
 	}
 }
@@ -103,7 +106,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("%s", err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusForbidden)
+		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
 	}
 	bodyString := string(bodyBytes)
@@ -112,8 +116,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	user, err := db.ValidatePassword(userinfo.Username, userinfo.Password)
 	if err != nil {
 		log.Printf("%s", err)
-		w.WriteHeader(http.StatusBadRequest)
-		_, _ = w.Write(helper.MarshaUp(err))
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -121,7 +125,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(execStatus)
 		// ignore error
-		_, _ = w.Write(helper.MarshaUp(err))
+		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
 	}
 }
@@ -134,7 +138,8 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("%s", err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusForbidden)
+		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
 	}
 	bodyString := string(bodyBytes)
@@ -145,7 +150,8 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	err = db.Update(username, userinfo)
 	if err != nil {
 		log.Printf("%s", err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusForbidden)
+		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -153,7 +159,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(execStatus)
 		// ignore error
-		_, _ = w.Write(helper.MarshaUp(err))
+		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
 	}
 }
