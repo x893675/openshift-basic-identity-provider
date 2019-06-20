@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"openshift-basic-identity-provider/helper"
 
@@ -94,9 +95,21 @@ func Update(username string, userinfo User) error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(userinfo.Username, userinfo.Password, userinfo.Email, userinfo.Name, username)
+	result, err := stmt.Exec(userinfo.Username, userinfo.Password, userinfo.Email, userinfo.Name, username)
 	if err != nil {
 		return err
+	}
+	if err != nil {
+		return err
+	}
+	affected, err := result.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if affected == 0 {
+		return errors.New("no user found")
 	}
 	return nil
 }
@@ -109,10 +122,20 @@ func Delete(username string) error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(username)
+	result, err := stmt.Exec(username)
 	if err != nil {
 		return err
 	}
+	affected, err := result.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if affected == 0 {
+		return errors.New("no user found")
+	}
+
 	return nil
 }
 
