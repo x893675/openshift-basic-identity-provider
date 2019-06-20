@@ -18,7 +18,10 @@
       "kind": "PersistentVolumeClaim",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${PVC_NAME}"
+        "name": "${PVC_NAME}",
+        "annotations": {
+          "volume.beta.kubernetes.io/storage-class": "${STORAGE_CLASS}"
+        }
       },
       "spec": {
         "accessModes": [
