@@ -38,11 +38,28 @@ func InitDB() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// sqlStmt := `Describe user;`
-	// _, err = db_driver.Exec(sqlStmt)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+
+	tx, err := db_driver.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+	stmt, err := tx.Prepare("insert or ignore into user(username,password,email,name) values(?, ?, ?, ?),(?, ?, ?, ?),(?, ?, ?, ?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	adminpw := AesEncrypt("admin", salt_key)
+	developer := AesEncrypt("developer", salt_key)
+	operater := AesEncrypt("operater", salt_key)
+
+	_, err = stmt.Exec("admin", adminpw, "admin@admin.com", "admin", "developer", developer, "developer@developer.com", "developer", "operater", operater, "operater@operater.com", "operater")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tx.Commit()
+
 }
 
 func Insert(userinfo User) error {
