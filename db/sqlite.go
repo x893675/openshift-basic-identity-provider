@@ -63,12 +63,12 @@ func InitDB() {
 }
 
 func Insert(userinfo User) error {
-	tx, err := db_driver.Begin()
-	if err != nil {
-		return err
-		//log.Fatal(err)
-	}
-	stmt, err := tx.Prepare("insert into user(username,password,email,name) values(?, ?, ?, ?)")
+	// tx, err := db_driver.Begin()
+	// if err != nil {
+	// 	return err
+	// 	//log.Fatal(err)
+	// }
+	stmt, err := db_driver.Prepare("insert into user(username,password,email,name) values(?, ?, ?, ?)")
 	if err != nil {
 		return err
 		//log.Fatal(err)
@@ -82,7 +82,7 @@ func Insert(userinfo User) error {
 		return err
 	}
 
-	tx.Commit()
+	//tx.Commit()
 	return nil
 }
 
