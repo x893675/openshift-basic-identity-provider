@@ -10,6 +10,9 @@ import (
 
 var db_path = new(string)
 
+// key的长度为16,24,32位字符串
+var salt_key string = "1234567887654321"
+
 var db_driver *sql.DB
 
 const createTable string = `CREATE TABLE IF NOT EXISTS user(
@@ -55,7 +58,9 @@ func Insert(userinfo User) error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(userinfo.Username, userinfo.Password, userinfo.Email, userinfo.Name)
+	encryptPw := AesEncrypt(userinfo.Password, salt_key)
+
+	_, err = stmt.Exec(userinfo.Username, encryptPw, userinfo.Email, userinfo.Name)
 	if err != nil {
 		return err
 	}
@@ -120,7 +125,8 @@ func ValidatePassword(username string, password string) (User, error) {
 		return user, err
 	}
 	defer stmt.Close()
-	err = stmt.QueryRow(username, password).Scan(&user.Id, &user.Username, &user.Email, &user.Name)
+	encryptPw := AesEncrypt(username, salt_key)
+	err = stmt.QueryRow(username, encryptPw).Scan(&user.Id, &user.Username, &user.Email, &user.Name)
 	if err == sql.ErrNoRows {
 		return user, err
 	} else if err != nil {
