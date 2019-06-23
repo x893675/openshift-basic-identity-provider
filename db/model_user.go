@@ -3,9 +3,9 @@ package db
 import "time"
 
 type User struct {
-	ID uint `json:"id,omitempty" gorm:"primary_key;AUTO_INCREMENT"`
+	ID uint `json:"id,omitempty"gorm:"primary_key;AUTO_INCREMENT"`
 
-	Username string `json:"username" gorm:"unique;not null`
+	Username string `json:"username"gorm:"unique;not null`
 
 	Password string `json:"password,omitempty"`
 
