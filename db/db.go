@@ -2,6 +2,7 @@ package db
 
 import (
 	"time"
+	"openshift-basic-identity-provider/helper"
 log "github.com/sirupsen/logrus"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"

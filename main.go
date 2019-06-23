@@ -11,7 +11,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 
 	// WARNING!
@@ -23,6 +22,7 @@ import (
 	//
 	"openshift-basic-identity-provider/db"
 	sw "openshift-basic-identity-provider/swagger"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -30,7 +30,12 @@ func main() {
 
 	router := sw.NewRouter()
 
-	db.InitDB()
+	db.DB = &db.CRDB{DBLink: db.ConnectDB()}
+	defer db.DB.Close()
+	if err := db.DB.CreateTable(&db.User{}); err != nil {
+                log.Error("create table user_ failed.", err)
+                return
+        }
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
