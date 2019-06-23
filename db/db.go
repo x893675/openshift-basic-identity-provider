@@ -13,6 +13,12 @@ var db_path = new(string)
 var salt_key string = "1234567887654321"
 var DB Store
 
+func init() {
+	helper.SetLocalVar("DB_PATH", db_path, "./user.db")
+	//log.Printf(*db_path)
+}
+
+
 type Store interface {
 	SetLink(*gorm.DB)
 	GetLink() (*gorm.DB)
@@ -29,7 +35,7 @@ type Store interface {
 func ConnectDB() (db *gorm.DB) {
 	for {
 		var err error
-		db, err = gorm.Open("sqlite3", "/tmp/gorm.db")
+		db, err = gorm.Open("sqlite3", *db_path)
 		db.DB().SetMaxOpenConns(100)
 		db.DB().SetMaxIdleConns(10)
 		db.DB().SetConnMaxLifetime(20*time.Second)

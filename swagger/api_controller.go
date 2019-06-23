@@ -33,14 +33,14 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	bodyString := string(bodyBytes)
 	var userinfo db.User
 	helper.UnmarshaUp(bodyString, &userinfo)
-	fmt.Println(userinfo)
-	err = db.Insert(userinfo)
-	if err != nil {
+	//fmt.Println(userinfo)
+
+	if err:=db.DB.Save(&userinfo); err != nil{
 		log.Printf("%s", err)
 		w.WriteHeader(http.StatusForbidden)
 		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
-	}
+		}
 	w.WriteHeader(http.StatusOK)
 	execStatus, err := w.Write(helper.MarshaUp(userinfo))
 	if err != nil {
@@ -48,28 +48,28 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
 	}
-	defer func() {
-		err := recover()
-		if err != nil {
-			log.Printf("Internal error: %s", err)
-			var err_str string
-			var ok bool
-			if err_str, ok = err.(string); !ok {
-				err_str = "We encountered an internal error"
-			}
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err_str))
-		}
-	}()
+	// defer func() {
+	// 	err := recover()
+	// 	if err != nil {
+	// 		log.Printf("Internal error: %s", err)
+	// 		var err_str string
+	// 		var ok bool
+	// 		if err_str, ok = err.(string); !ok {
+	// 			err_str = "We encountered an internal error"
+	// 		}
+	// 		w.WriteHeader(http.StatusInternalServerError)
+	// 		w.Write([]byte(err_str))
+	// 	}
+	// }()
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	temp := strings.Split(r.URL.Path, "/")
 	username := temp[len(temp)-1]
-	fmt.Println(username)
-	err := db.Delete(username)
-	if err != nil {
+	//fmt.Println(username)
+
+	if err:= db.DB.Delete(&db.User{}, "username=?", username); err != nil {
 		log.Printf("%s", err)
 		w.WriteHeader(http.StatusForbidden)
 		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
@@ -78,20 +78,19 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// func GetUserByName(w http.ResponseWriter, r *http.Request) {
-// 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-// 	w.WriteHeader(http.StatusOK)
-// }
 
 func ListUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	users, err := db.Query()
-	if err != nil {
+
+	users := []db.User{}
+	//query
+	if err:= db.DB.Find(&users); err != nil && err.Error() != "record not found"{
 		log.Printf("%s", err)
 		w.WriteHeader(http.StatusForbidden)
 		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 	execStatus, err := w.Write(helper.MarshaUp(users))
 	if err != nil {
@@ -113,15 +112,15 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	bodyString := string(bodyBytes)
 	var userinfo db.User
 	helper.UnmarshaUp(bodyString, &userinfo)
-	user, err := db.ValidatePassword(userinfo.Username, userinfo.Password)
-	if err != nil {
+
+	if err:= db.DB.Find(&userinfo, "username =? and password=?",userinfo.Username,userinfo.Password); err != nil{
 		log.Printf("%s", err)
 		w.WriteHeader(http.StatusUnauthorized)
 		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	execStatus, err := w.Write(helper.MarshaUp(user))
+	execStatus, err := w.Write(helper.MarshaUp(userinfo))
 	if err != nil {
 		w.WriteHeader(execStatus)
 		// ignore error
@@ -147,13 +146,14 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	var userinfo db.User
 	helper.UnmarshaUp(bodyString, &userinfo)
 	fmt.Println(userinfo)
-	err = db.Update(username, userinfo)
-	if err != nil {
+
+
+	if err := db.DB.Update(&userinfo, "username=?", username); err != nil {
 		log.Printf("%s", err)
 		w.WriteHeader(http.StatusForbidden)
 		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
-	}
+  }
 	w.WriteHeader(http.StatusOK)
 	execStatus, err := w.Write(helper.MarshaUp(userinfo))
 	if err != nil {
