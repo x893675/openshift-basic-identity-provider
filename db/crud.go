@@ -1,6 +1,7 @@
 package db
 
 import (
+	"errors"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	log "github.com/sirupsen/logrus"
@@ -70,11 +71,14 @@ func (crdb *CRDB) Delete(in interface{}, where ...interface{}) error {
 		return err
 	}
 
-	if err := crdb.DBLink.Delete(in, where...).Error; err != nil {
-		log.Errorf("delete db record error: %v", err)
-		return err
+	result := crdb.DBLink.Delete(in, where...)
+	if result.Error != nil {
+		log.Errorf("delete db record error: %v", result.Error)
+		return result.Error
+	}else if result.RowsAffected == 0 {
+		//log.Errorf("record is not exist ",result.RowsAffected)
+		return errors.New("record is not exist")
 	}
-
 	return nil
 }
 
@@ -104,17 +108,6 @@ func (crdb *CRDB) CreateTable(in interface{}) error {
 	return nil
 }
 
-func (crdb *CRDB) InitTableData(in interface{}, where ...interface{}) error {
-
-	if err := crdb.DBLink.DB().Ping(); err != nil {
-		return err
-	}
-	if err := crdb.DBLink.Where(where...).FirstOrInit(in).Error; err != nil {
-		log.Error("create table failed.", err)
-		return err
-	}
-	return nil
-}
 
 func (crdb *CRDB) Close() {
 

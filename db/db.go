@@ -1,6 +1,8 @@
 package db
 
 import (
+	"time"
+log "github.com/sirupsen/logrus"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
   )
@@ -20,7 +22,6 @@ type Store interface {
 	Delete(in interface{}, where ...interface{}) error
 	Update(in interface{}, query string, where ...interface{}) error
 	CreateTable(interface{}) error
-	InitTableData(in interface{}, where ...interface{}) error
 	Close()
 }
 
