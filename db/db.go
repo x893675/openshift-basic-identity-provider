@@ -10,7 +10,7 @@ log "github.com/sirupsen/logrus"
 var db_path = new(string)
 
   // key的长度为16,24,32位字符串
-var salt_key string = "1234567887654321"
+var SALT_KEY string = "1234567887654321"
 var DB Store
 
 func init() {

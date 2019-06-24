@@ -34,7 +34,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	var userinfo db.User
 	helper.UnmarshaUp(bodyString, &userinfo)
 	//fmt.Println(userinfo)
-
+	userinfo.Password=AesEncrypt(userinfo.Password, db.SALT_KEY)
 	if err:=db.DB.Save(&userinfo); err != nil{
 		log.Printf("%s", err)
 		w.WriteHeader(http.StatusForbidden)
@@ -42,6 +42,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 		}
 	w.WriteHeader(http.StatusOK)
+	userinfo.Password=""
 	execStatus, err := w.Write(helper.MarshaUp(userinfo))
 	if err != nil {
 		w.WriteHeader(execStatus)
@@ -90,7 +91,9 @@ func ListUsers(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
 	}
-
+	for index := range users{
+		users[index].Password=""
+	}
 	w.WriteHeader(http.StatusOK)
 	execStatus, err := w.Write(helper.MarshaUp(users))
 	if err != nil {
@@ -112,6 +115,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	bodyString := string(bodyBytes)
 	var userinfo db.User
 	helper.UnmarshaUp(bodyString, &userinfo)
+	userinfo.Password=AesEncrypt(userinfo.Password, db.SALT_KEY)
 
 	if err:= db.DB.Find(&userinfo, "username =? and password=?",userinfo.Username,userinfo.Password); err != nil{
 		log.Printf("%s", err)
@@ -119,6 +123,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
 	}
+	userinfo.Password=""
 	w.WriteHeader(http.StatusOK)
 	execStatus, err := w.Write(helper.MarshaUp(userinfo))
 	if err != nil {
@@ -155,11 +160,21 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
   }
 	w.WriteHeader(http.StatusOK)
-	execStatus, err := w.Write(helper.MarshaUp(userinfo))
-	if err != nil {
-		w.WriteHeader(execStatus)
-		// ignore error
-		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
-		return
-	}
+	// execStatus, err := w.Write(helper.MarshaUp(userinfo))
+	// if err != nil {
+	// 	w.WriteHeader(execStatus)
+	// 	// ignore error
+	// 	_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
+	// 	return
+	// }
 }
+
+
+// func respSerialize(){
+// 	vars := r.FormValue("id")
+// 	if vars == ""{
+// 		log.Printf("var is nil")
+// 	}
+// 	log.Printf("%v",vars)
+// 	w.WriteHeader(http.StatusOK)
+// }
