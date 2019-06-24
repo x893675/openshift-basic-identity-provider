@@ -12,6 +12,7 @@ package swagger
 
 import (
 	"fmt"
+	"encoding/base64"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -120,7 +121,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	auth := strings.Replace(r.Header["Authorization"][0],"Basic ", "", 1)
 	credential, _ := base64.StdEncoding.DecodeString(auth)
 	userAndPassword := strings.Split(string(credential), ":")
-	userAndPassword[1] = db.AesEncrypt(userAndPassword[1])
+	userAndPassword[1] = db.AesEncrypt(userAndPassword[1], *db.SALT_KEY)
 
 
 	// if err:= db.DB.Find(&userinfo, "username =? and password=?",userinfo.Username,userinfo.Password); err != nil{
