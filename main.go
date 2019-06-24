@@ -47,7 +47,7 @@ func initTable(){
 	admin := db.User{Username: "admin",Password: db.AesEncrypt("admin", *db.SALT_KEY),Email: "admin@admin.com",Name: "admin"}
 	developer := db.User{Username: "developer",Password: db.AesEncrypt("developer", *db.SALT_KEY),Email: "developer@developer.com",Name: "developer"}
 	operator := db.User{Username: "operator",Password: db.AesEncrypt("operator", *db.SALT_KEY),Email: "operator@operator.com",Name: "operator"}
-	_ := db.DB.Save(&admin)
-	_ := db.DB.Save(&developer)
-	_ := db.DB.Save(&operator)
+	_ = db.DB.Save(&admin)
+	_ = db.DB.Save(&developer)
+	_ = db.DB.Save(&operator)
 }
