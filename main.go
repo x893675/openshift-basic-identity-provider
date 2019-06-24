@@ -38,8 +38,9 @@ func main() {
         }
 
 	initTable()
-
-	log.Fatal(http.ListenAndServe(":8080", router))
+	crt, key := "/etc/origin/master/custom_auth/admin.crt", "/etc/origin/master/custom_auth/admin.key"
+	log.Fatal(http.ListenAndServeTLS(":8080", crt, key, router))
+	//log.Fatal(http.ListenAndServe(":8080", router))
 }
 
 
