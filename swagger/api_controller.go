@@ -34,7 +34,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	var userinfo db.User
 	helper.UnmarshaUp(bodyString, &userinfo)
 	//fmt.Println(userinfo)
-	userinfo.Password=AesEncrypt(userinfo.Password, db.SALT_KEY)
+	userinfo.Password=db.AesEncrypt(userinfo.Password, *db.SALT_KEY)
 	if err:=db.DB.Save(&userinfo); err != nil{
 		log.Printf("%s", err)
 		w.WriteHeader(http.StatusForbidden)
@@ -115,7 +115,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	bodyString := string(bodyBytes)
 	var userinfo db.User
 	helper.UnmarshaUp(bodyString, &userinfo)
-	userinfo.Password=AesEncrypt(userinfo.Password, db.SALT_KEY)
+	userinfo.Password=db.AesEncrypt(userinfo.Password, *db.SALT_KEY)
 
 	if err:= db.DB.Find(&userinfo, "username =? and password=?",userinfo.Username,userinfo.Password); err != nil{
 		log.Printf("%s", err)
@@ -150,9 +150,9 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	//var result map[string]interface{}
 	var userinfo db.User
 	helper.UnmarshaUp(bodyString, &userinfo)
-	fmt.Println(userinfo)
+	//fmt.Println(userinfo)
 
-
+	userinfo.Password=db.AesEncrypt(userinfo.Password, *db.SALT_KEY)
 	if err := db.DB.Update(&userinfo, "username=?", username); err != nil {
 		log.Printf("%s", err)
 		w.WriteHeader(http.StatusForbidden)

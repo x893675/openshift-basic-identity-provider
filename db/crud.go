@@ -88,9 +88,12 @@ func (crdb *CRDB) Update(in interface{}, query string, where ...interface{}) err
 		return err
 	}
 
-	if err := crdb.DBLink.Model(in).Where(query, where...).Update(in).Error; err != nil {
+	result := crdb.DBLink.Model(in).Where(query, where...).Update(in)
+	if result.Error != nil {
 		log.Error("update db record failed.", err)
 		return err
+	}else if result.RowsAffected == 0 {
+		return errors.New("record is not exist")
 	}
 	return nil
 }

@@ -11,11 +11,12 @@ log "github.com/sirupsen/logrus"
 var db_path = new(string)
 
   // key的长度为16,24,32位字符串
-var SALT_KEY string = "1234567887654321"
+var SALT_KEY = new(string) //"1234567887654321"
 var DB Store
 
 func init() {
 	helper.SetLocalVar("DB_PATH", db_path, "./user.db")
+	helper.SetLocalVar("SALT_KEY", SALT_KEY, "1234567887654321")
 	//log.Printf(*db_path)
 }
 
