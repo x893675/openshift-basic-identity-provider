@@ -119,8 +119,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	// userinfo.Password=db.AesEncrypt(userinfo.Password, *db.SALT_KEY)
 
 	auth := strings.Replace(r.Header["Authorization"][0],"Basic ", "", 1)
+	fmt.Println("%v",auth)
 	credential, _ := base64.StdEncoding.DecodeString(auth)
+	fmt.Println("%v",credential)
 	userAndPassword := strings.Split(string(credential), ":")
+	fmt.Println("%v",userAndPassword)
 	userAndPassword[1] = db.AesEncrypt(userAndPassword[1], *db.SALT_KEY)
 
 
