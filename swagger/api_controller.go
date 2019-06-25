@@ -137,7 +137,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userinfo.Password=""
-	userinfo.Sub = userinfo.ID
+	userinfo.Sub = string(userinfo.ID)
 	userinfo.PreferredUsername = userinfo.Name
 	userinfo.Username = ""
 	w.WriteHeader(http.StatusOK)
