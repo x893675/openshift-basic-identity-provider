@@ -86,7 +86,7 @@ var routes = Routes{
 
 	Route{
 		"Login",
-		strings.ToUpper("Post"),
+		strings.ToUpper("Get"),
 		"/openshift-basic-identity-provider/1.0.0/auth/token",
 		Login,
 	},
