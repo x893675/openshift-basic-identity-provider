@@ -11,4 +11,8 @@ type User struct {
 	Email string `json:"email,omitempty"`
 
 	Name string `json:"name,omitempty"`
+
+	Sub string `json:"sub,omitempty"gorm:"-"`
+
+	PreferredUsername string `json:"preferred_username,omitempty"gorm:"-"`
 }

@@ -137,6 +137,9 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userinfo.Password=""
+	userinfo.Sub = userinfo.ID
+	userinfo.PreferredUsername = userinfo.Name
+	userinfo.Username = ""
 	w.WriteHeader(http.StatusOK)
 	execStatus, err := w.Write(helper.MarshaUp(userinfo))
 	if err != nil {
