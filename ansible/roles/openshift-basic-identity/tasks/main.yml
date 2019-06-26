@@ -1,0 +1,19 @@
+- name: Create openshift basic identity template json file
+  template:
+    src: "{{ role_path }}/templates/tmpl-no-pv.json"
+    dest: /tmp/tmpl-no-pv.json
+    mode: 666
+
+- name: oc login as super user
+  shell: "{{ oc_binary_path }} login -u system:admin"
+
+- name: Create openshift basic identity app
+  shell: "{{ oc_binary_path }} new-app -f /tmp/tmpl-no-pv.json -n {{ app_namespace }}"
+
+- name: Create app tls route
+  shell: "{{ oc_binary_path }} create route edge --service={{ app_name }} --cert={{ route_cert }} --key={{ route_cert_key }} --ca-cert={{ route_ca_cert }} --hostname={{ app_domain }}"
+
+- name: Remove spring boot template json file
+  file:
+    path: /tmp/tmpl-no-pv.json
+    state: absent

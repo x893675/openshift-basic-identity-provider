@@ -1,0 +1,177 @@
+{
+  "kind": "Template",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "${APPLICATION_NAME}",
+    "annotations": {
+      "description": "An openshfit basic identity provider application written in Golang",
+      "tags": "golang",
+      "iconClass": "icon-go-gopher"
+    }
+  },
+  "labels": {
+      "template": "${APPLICATION_NAME}",
+      "app": "${APPLICATION_NAME}"
+  },
+  "objects": [
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}",
+        "annotations": {
+          "description": "Exposes and load balances the application pods"
+        }
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "web",
+            "port": 8080,
+            "targetPort": 8080
+          }
+        ],
+        "selector": {
+          "name": "${APPLICATION_NAME}"
+        }
+      }
+    },
+    {
+      "kind": "ImageStream",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}",
+        "annotations": {
+          "description": "Keeps track of changes in the application image"
+        }
+      }
+    },
+    {
+      "kind": "BuildConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}",
+        "annotations": {
+          "description": "Defines how to build the application"
+        }
+      },
+      "spec": {
+        "source": {
+          "type": "Git",
+          "git": {
+            "uri": "${SOURCE_REPOSITORY_URL}",
+            "ref": "${SOURCE_REPOSITORY_REF}"
+          },
+          "contextDir": "${CONTEXT_DIR}"
+        },
+        "strategy": {
+          "type": "Docker"
+        },
+        "output": {
+          "to": {
+            "kind": "ImageStreamTag",
+            "name": "${APPLICATION_NAME}:latest"
+          }
+        },
+        "triggers": [
+          {
+            "type": "ConfigChange"
+          },
+          {
+            "type": "GitHub",
+            "github": {
+              "secret": "${GITHUB_WEBHOOK_SECRET}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}",
+        "annotations": {
+          "description": "Defines how to deploy the application server"
+        }
+      },
+      "spec": {
+        "strategy": {
+          "type": "Recreate"
+        },
+        "triggers": [
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "${APPLICATION_NAME}"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "name": "${APPLICATION_NAME}:latest"
+              }
+            }
+          },
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "replicas": 1,
+        "selector": {
+          "name": "${APPLICATION_NAME}"
+        },
+        "template": {
+          "metadata": {
+            "name": "${APPLICATION_NAME}",
+            "labels": {
+              "name": "${APPLICATION_NAME}"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "name": "${APPLICATION_NAME}",
+                "image": "${APPLICATION_NAME}",
+                "ports": [
+                  {
+                    "containerPort": 8080
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "parameters": [
+    {
+      "name": "APPLICATION_NAME",
+      "description": "The name for the application.",
+      "value": "{{ app_name }}",
+      "required": true
+    },
+    {
+      "name": "SOURCE_REPOSITORY_URL",
+      "description": "The URL of the repository with your application source code",
+      "value": "{{ source_repo }}"
+    },
+    {
+      "name": "SOURCE_REPOSITORY_REF",
+      "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch",
+      "value": "{{ repo_ref }}"
+    },
+    {
+      "name": "CONTEXT_DIR",
+      "description": "Set this to the relative path to your project if it is not in the root of your repository",
+      "value": "/"
+    },
+    {
+      "name": "GITHUB_WEBHOOK_SECRET",
+      "description": "Github trigger secret.  A difficult to guess string encoded as part of the webhook URL.  Not encrypted.",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{40}"
+    }
+  ]
+}

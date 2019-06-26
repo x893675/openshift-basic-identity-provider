@@ -1,0 +1,15 @@
+[master]
+openstack-vm2
+
+
+[hosts:vars]
+ansible_ssh_user=centos
+oc_binary_path="/bin/oc"
+app_name="openshift-basic-identity-provider2"
+source_repo="https://github.com/x893675/openshift-basic-identity-provider.git"
+repo_ref="test"
+app_domain="basic-identity-myproject.openstack-vm2-apps.demotheworld.com"
+app_namespace="myproject"
+route_cert="/etc/origin/master/custom_auth/admin.crt"
+route_cert_key="/etc/origin/master/custom_auth/admin.crt"
+route_ca_cert="/etc/origin/master/custom_auth/ca.crt"

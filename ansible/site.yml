@@ -1,0 +1,8 @@
+- name: Apply role openshift-basic-identity
+  gather_facts: false
+  hosts:
+    - master
+  roles:
+    - role: openshift-basic-identity
+  remote_user: root
+  sudo: True
