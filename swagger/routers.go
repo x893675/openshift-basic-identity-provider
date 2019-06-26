@@ -16,6 +16,8 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/rakyll/statik/fs"
+	_ "openshift-basic-identity-provider/statik"
 )
 
 type Route struct {
@@ -29,6 +31,14 @@ type Routes []Route
 
 func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
+	statikFS, err := fs.New()
+	if err != nil {
+		panic(err)
+	}
+	staticServer := http.FileServer(statikFS)
+	sh := http.StripPrefix("/openshift-basic-identity-provider/1.0.0/api/", staticServer)
+	router.PathPrefix("/openshift-basic-identity-provider/1.0.0/api/").Handler(sh)
+
 	for _, route := range routes {
 		var handler http.Handler
 		handler = route.HandlerFunc
@@ -49,13 +59,6 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 var routes = Routes{
-	Route{
-		"Index",
-		"GET",
-		"/openshift-basic-identity-provider/1.0.0/",
-		Index,
-	},
-
 	Route{
 		"CreateUser",
 		strings.ToUpper("Post"),

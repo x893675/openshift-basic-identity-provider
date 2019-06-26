@@ -1,0 +1,211 @@
+---
+swagger: "2.0"
+info:
+  description: "openshift basic identity provider"
+  version: "1.0.0"
+  title: "openshift basic identity"
+  contact:
+    email: "zhu.xiaowei@99cloud.net"
+host: "virtserver.swaggerhub.com"
+basePath: "/x893675/openshift-basic-identity-provider/1.0.0"
+tags:
+- name: "auth/token"
+  description: "login validate"
+- name: "user"
+  description: "operator for user"
+schemes:
+- "https"
+- "http"
+paths:
+  /auth/token:
+    get:
+      tags:
+      - "auth/token"
+      parameters: []
+      responses:
+        200:
+          description: "OK (successfully authenticated)"
+          schema:
+            $ref: "#/definitions/User"
+        401:
+          description: "Authentication Failed"
+          schema:
+            type: "object"
+            properties:
+              error:
+                type: "string"
+                description: "Authentication failed"
+      security:
+      - basicAuth: []
+  /users:
+    get:
+      tags:
+      - "user"
+      summary: "list all user"
+      description: "list all user"
+      operationId: "listUsers"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "query"
+        description: "query user for id"
+        required: false
+        type: "integer"
+        x-exportParamName: "Id"
+        x-optionalDataType: "Int32"
+      - name: "username"
+        in: "query"
+        description: "query user for username"
+        required: false
+        type: "string"
+        x-exportParamName: "Username"
+        x-optionalDataType: "String"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/User"
+        403:
+          description: "list user error"
+          schema:
+            type: "object"
+            properties:
+              error:
+                type: "string"
+  /user/{username}:
+    put:
+      tags:
+      - "user"
+      summary: "Updated user"
+      description: "This can only be done by the logged in user."
+      operationId: "updateUser"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "username"
+        in: "path"
+        description: "name that need to be updated"
+        required: true
+        type: "string"
+        x-exportParamName: "Username"
+      - in: "body"
+        name: "body"
+        description: "Updated user object"
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+        x-exportParamName: "Body"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/User"
+        403:
+          description: "update user error"
+          schema:
+            type: "object"
+            properties:
+              error:
+                type: "string"
+    delete:
+      tags:
+      - "user"
+      summary: "Delete user"
+      description: "This can only be done by the logged in user."
+      operationId: "deleteUser"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "username"
+        in: "path"
+        description: "The name that needs to be deleted"
+        required: true
+        type: "string"
+        x-exportParamName: "Username"
+      responses:
+        403:
+          description: "update user error"
+          schema:
+            type: "object"
+            properties:
+              error:
+                type: "string"
+  /user:
+    post:
+      tags:
+      - "user"
+      summary: "Create user"
+      description: "This can only be done by the logged in user."
+      operationId: "createUser"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Created user object"
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+        x-exportParamName: "Body"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/User"
+        403:
+          description: "update user error"
+          schema:
+            type: "object"
+            properties:
+              error:
+                type: "string"
+securityDefinitions:
+  basicAuth:
+    type: "basic"
+definitions:
+  User:
+    type: "object"
+    required:
+    - "username"
+    properties:
+      id:
+        type: "integer"
+        example: 1
+      username:
+        type: "string"
+        example: "admin"
+      password:
+        type: "string"
+        example: "admin"
+      email:
+        type: "string"
+        example: "admin@admin.com"
+      sub:
+        type: "string"
+        example: "1"
+      name:
+        type: "string"
+        example: "admin"
+      preferred_username:
+        type: "string"
+        example: "admin"
+    example:
+      sub: "1"
+      password: "admin"
+      name: "admin"
+      id: 1
+      preferred_username: "admin"
+      email: "admin@admin.com"
+      username: "admin"
+  inline_response_401:
+    properties:
+      error:
+        type: "string"
+        description: "Authentication failed"
+  inline_response_403:
+    properties:
+      error:
+        type: "string"
