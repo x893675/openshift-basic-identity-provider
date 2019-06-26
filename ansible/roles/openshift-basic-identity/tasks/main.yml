@@ -3,17 +3,26 @@
     src: "{{ role_path }}/templates/tmpl-no-pv.json"
     dest: /tmp/tmpl-no-pv.json
     mode: 666
+  when: app_type == ""
 
-- name: oc login as super user
-  shell: "{{ oc_binary_path }} login -u system:admin"
+- name: Create openshift basic identity use storage class template json file
+  shell: "echo hello"
+  when: app_type == "use_sc"
 
-- name: Create openshift basic identity app
-  shell: "{{ oc_binary_path }} new-app -f /tmp/tmpl-no-pv.json -n {{ app_namespace }}"
+#- name: oc login as super user
+#  shell: "{{ oc_binary_path }} login -u system:admin"
 
-- name: Create app tls route
-  shell: "{{ oc_binary_path }} create route edge --service={{ app_name }} --cert={{ route_cert }} --key={{ route_cert_key }} --ca-cert={{ route_ca_cert }} --hostname={{ app_domain }}"
+#- name: Create openshift basic identity app
+#  shell: "{{ oc_binary_path }} new-app -f /tmp/tmpl-no-pv.json -n {{ app_namespace }}"
 
-- name: Remove spring boot template json file
-  file:
-    path: /tmp/tmpl-no-pv.json
-    state: absent
+#- name: "Wait {{ deplyment_deleting_wait_time_second }} seconds for create service"
+#  pause:
+#    seconds: "{{ deplyment_deleting_wait_time_second }}"
+
+#- name: Create app tls route
+#  shell: "{{ oc_binary_path }} create route edge --service={{ app_name }} --cert={{ route_cert }} --key={{ route_cert_key }} --ca-cert={{ route_ca_cert }} --hostname={{ app_domain }} -n {{ app_namespace }}"
+
+#- name: Remove spring boot template json file
+#  file:
+#    path: /tmp/tmpl-no-pv.json
+#    state: absent
