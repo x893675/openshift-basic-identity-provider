@@ -4,16 +4,20 @@ openstack-vm2
 
 [all:vars]
 ansible_ssh_user=centos
+# app_type空值为不外挂存储，use_sc为使用storage_class
 app_type=""
 oc_binary_path="/bin/oc"
 app_name="openshift-basic-identity-provider2"
 source_repo="https://github.com/x893675/openshift-basic-identity-provider.git"
 repo_ref="test"
+# app_domain为应用的https域名，与openshift集群master-config中oauthconfig中的provider域名以及自签证书中的common name一致
 app_domain="basic-identity-myproject.openstack-vm2-apps.demotheworld.com"
 app_namespace="myproject"
+# 证书为openshift集群master-config中oauthconfig中的provider证书
 route_cert="/etc/origin/master/custom_auth/admin.crt"
 route_cert_key="/etc/origin/master/custom_auth/admin.key"
 route_ca_cert="/etc/origin/master/custom_auth/ca.crt"
 deplyment_deleting_wait_time_second=10
+# storage_class 和 pv_size 在app_type="use_sc"时生效
 storage_class="openstack-sc"
 pv_size="1Gi"

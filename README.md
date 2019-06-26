@@ -14,16 +14,57 @@
 ### 数据表结构
 
 ```sqlite
-CREATE TABLE IF NOT EXISTS user(
-	id integer not null primary key, 
-	username text not null unique,
-	password text not null,
-	email text,
-	name text
-	)
+type User struct {
+	ID uint `json:"id,omitempty"gorm:"primary_key;AUTO_INCREMENT"`
+
+	Username string `json:"username"gorm:"unique;not null"`
+
+	Password string `json:"password,omitempty"`
+
+	Email string `json:"email,omitempty"`
+
+	Name string `json:"name,omitempty"`
+
+	Sub string `json:"sub,omitempty"gorm:"-"`
+
+	PreferredUsername string `json:"preferred_username,omitempty"gorm:"-"`
+}
 ```
 
 ## how to start
+
+### Ansible自动部署
+
+- 请确保你的openshift的目录上存在目录 `/etc/origin/master/custom_auth`
+
+- 使用openssl自签证书，用于openshift identity配置以及应用route使用，可参考[这篇文章，注意签名中的域名换成你自己的](http://gitlab.sh.99cloud.net/openshift_origin/openshift-authentication-extension/tree/master)
+
+- 请确保修改你的openshift配置文件在 `/etc/origin/master/master-config.yaml`, 中间的oauth的配置样板如下
+
+  ```yaml
+  oauthConfig:
+    assetPublicURL: https://openstack-vm2-master.demotheworld.com:8443/console/
+    grantConfig:
+      method: auto
+    identityProviders:
+    - name: my_remote_basic_auth_provider
+      challenge: true
+      login: true
+      mappingMethod: add
+      provider:
+        apiVersion: v1
+        kind: BasicAuthPasswordIdentityProvider
+        url: https://basic-identity--myproject.openstack-vm2-apps.demotheworld.com/openshift-basic-identity-provider/1.0.0/auth/token
+        ca: /etc/origin/master/custom_auth/ca.crt
+        certFile: /etc/origin/master/custom_auth/admin.crt
+        keyFile: /etc/origin/master/custom_auth/admin.key
+  ```
+
+  其中,url为本应用route的https域名，应用的restful接口前缀为`openshift-basic-identity-provider/1.0.0`
+
+- 根据`ansible/inventory.example`的注释更改相应参数
+
+- 执行`ansible-playbook -i inventory.example site.yml`
 
 ### 容器运行
 
@@ -63,13 +104,13 @@ CREATE TABLE IF NOT EXISTS user(
 
   `curl -X DELETE "http://yourdomain/openshift-basic-identity-provider/1.0.0/user/john" -H "accept: application/json"`
 
-* validate login
-
-  `curl -X POST "http://yourdomain/openshift-basic-identity-provider/1.0.0/auth/token" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"password\": \"john\", \"username\": \"john\"}"`
 
 ### to do list
 
-- [ ] 错误处理及返回
-- [ ] 日志打印
-- [ ] 数据库字段加密
+- [x] 错误处理及返回
+- [ ] 统一日志输出
+- [x] 数据库字段加密
+- [x] ansible 部署
+- [ ] api认证
+- [ ] swagger ui 显示api详情
 
