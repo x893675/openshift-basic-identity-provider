@@ -1,19 +1,22 @@
 - name: Create openshift basic identity template json file
   template:
     src: "{{ role_path }}/templates/tmpl-no-pv.json"
-    dest: /tmp/tmpl-no-pv.json
+    dest: /tmp/basic-identity-tmpl.json
     mode: 666
   when: app_type == ""
 
 - name: Create openshift basic identity use storage class template json file
-  shell: "echo hello"
+  template:
+    src: "{{ role_path }}/templates/tmpl-use-sc.json"
+    dest: /tmp/basic-identity-tmpl.json
+    mode: 666
   when: app_type == "use_sc"
 
 #- name: oc login as super user
 #  shell: "{{ oc_binary_path }} login -u system:admin"
 
 #- name: Create openshift basic identity app
-#  shell: "{{ oc_binary_path }} new-app -f /tmp/tmpl-no-pv.json -n {{ app_namespace }}"
+#  shell: "{{ oc_binary_path }} new-app -f /tmp/basic-identity-tmpl.json -n {{ app_namespace }}"
 
 #- name: "Wait {{ deplyment_deleting_wait_time_second }} seconds for create service"
 #  pause:
@@ -24,5 +27,5 @@
 
 #- name: Remove spring boot template json file
 #  file:
-#    path: /tmp/tmpl-no-pv.json
+#    path: /tmp/basic-identity-tmpl.json
 #    state: absent

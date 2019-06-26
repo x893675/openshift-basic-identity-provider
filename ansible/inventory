@@ -4,7 +4,7 @@ openstack-vm2
 
 [all:vars]
 ansible_ssh_user=centos
-app_type=""
+app_type="use_sc"
 oc_binary_path="/bin/oc"
 app_name="openshift-basic-identity-provider2"
 source_repo="https://github.com/x893675/openshift-basic-identity-provider.git"
@@ -15,3 +15,5 @@ route_cert="/etc/origin/master/custom_auth/admin.crt"
 route_cert_key="/etc/origin/master/custom_auth/admin.key"
 route_ca_cert="/etc/origin/master/custom_auth/ca.crt"
 deplyment_deleting_wait_time_second=10
+storage_class="openstack-sc"
+pv_size="1Gi"
