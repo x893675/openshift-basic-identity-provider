@@ -12,20 +12,20 @@
     mode: 666
   when: app_type == "use_sc"
 
-#- name: oc login as super user
-#  shell: "{{ oc_binary_path }} login -u system:admin"
+- name: oc login as super user
+  shell: "{{ oc_binary_path }} login -u system:admin"
 
-#- name: Create openshift basic identity app
-#  shell: "{{ oc_binary_path }} new-app -f /tmp/basic-identity-tmpl.json -n {{ app_namespace }}"
+- name: Create openshift basic identity app
+  shell: "{{ oc_binary_path }} new-app -f /tmp/basic-identity-tmpl.json -n {{ app_namespace }}"
 
-#- name: "Wait {{ deplyment_deleting_wait_time_second }} seconds for create service"
-#  pause:
-#    seconds: "{{ deplyment_deleting_wait_time_second }}"
+- name: "Wait {{ deplyment_deleting_wait_time_second }} seconds for create service"
+  pause:
+    seconds: "{{ deplyment_deleting_wait_time_second }}"
 
-#- name: Create app tls route
-#  shell: "{{ oc_binary_path }} create route edge --service={{ app_name }} --cert={{ route_cert }} --key={{ route_cert_key }} --ca-cert={{ route_ca_cert }} --hostname={{ app_domain }} -n {{ app_namespace }}"
+- name: Create app tls route
+  shell: "{{ oc_binary_path }} create route edge --service={{ app_name }} --cert={{ route_cert }} --key={{ route_cert_key }} --ca-cert={{ route_ca_cert }} --hostname={{ app_domain }} -n {{ app_namespace }}"
 
-#- name: Remove spring boot template json file
-#  file:
-#    path: /tmp/basic-identity-tmpl.json
-#    state: absent
+- name: Remove spring boot template json file
+  file:
+    path: /tmp/basic-identity-tmpl.json
+    state: absent

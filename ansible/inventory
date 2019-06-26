@@ -4,7 +4,7 @@ openstack-vm2
 
 [all:vars]
 ansible_ssh_user=centos
-app_type="use_sc"
+app_type=""
 oc_binary_path="/bin/oc"
 app_name="openshift-basic-identity-provider2"
 source_repo="https://github.com/x893675/openshift-basic-identity-provider.git"
