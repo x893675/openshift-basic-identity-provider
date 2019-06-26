@@ -9,37 +9,22 @@ info:
 host: "virtserver.swaggerhub.com"
 basePath: "/x893675/openshift-basic-identity-provider/1.0.0"
 tags:
-- name: "admins"
-  description: "Secured Admin-only calls"
-- name: "developers"
-  description: "Operations available to regular developers"
+- name: "auth/token"
+  description: "login validate"
+- name: "user"
+  description: "operator for user"
 schemes:
 - "https"
 - "http"
 paths:
   /auth/token:
-    post:
+    get:
       tags:
-      - "admins"
-      - "developers"
-      summary: "Login validate"
-      description: "login validate"
-      operationId: "login"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "user"
-        description: "user name is sent to this service"
-        required: false
-        schema:
-          $ref: "#/definitions/User"
-        x-exportParamName: "User"
+      - "auth/token"
+      parameters: []
       responses:
         200:
-          description: "A user object"
+          description: "OK (successfully authenticated)"
           schema:
             $ref: "#/definitions/User"
         401:
@@ -49,26 +34,16 @@ paths:
             properties:
               error:
                 type: "string"
-                format: "uuid"
                 description: "Authentication failed"
-        403:
-          description: "Internal error"
-          schema:
-            type: "object"
-            properties:
-              error:
-                type: "string"
-                format: "uuid"
-                description: "Internal error"
+      security:
+      - basicAuth: []
   /users:
     get:
       tags:
-      - "admins"
+      - "user"
       summary: "list all user"
       description: "list all user"
       operationId: "listUsers"
-      consumes:
-      - "application/json"
       produces:
       - "application/json"
       parameters:
@@ -76,8 +51,15 @@ paths:
         in: "query"
         description: "query user for id"
         required: false
-        type: "string"
+        type: "integer"
         x-exportParamName: "Id"
+        x-optionalDataType: "Int32"
+      - name: "username"
+        in: "query"
+        description: "query user for username"
+        required: false
+        type: "string"
+        x-exportParamName: "Username"
         x-optionalDataType: "String"
       responses:
         200:
@@ -86,38 +68,17 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/User"
-        400:
-          description: "Invalid username supplied"
-        404:
-          description: "User not found"
-  /user/{username}:
-    get:
-      tags:
-      - "admins"
-      summary: "Get user by user name"
-      operationId: "getUserByName"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "username"
-        in: "path"
-        description: "The name that needs to be fetched. Use user1 for testing."
-        required: true
-        type: "string"
-        x-exportParamName: "Username"
-      responses:
-        200:
-          description: "successful operation"
+        403:
+          description: "list user error"
           schema:
-            $ref: "#/definitions/User"
-        400:
-          description: "Invalid username supplied"
-        404:
-          description: "User not found"
+            type: "object"
+            properties:
+              error:
+                type: "string"
+  /user/{username}:
     put:
       tags:
-      - "admins"
-      - "developers"
+      - "user"
       summary: "Updated user"
       description: "This can only be done by the logged in user."
       operationId: "updateUser"
@@ -138,13 +99,20 @@ paths:
           $ref: "#/definitions/User"
         x-exportParamName: "Body"
       responses:
-        400:
-          description: "Invalid user supplied"
-        404:
-          description: "User not found"
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/User"
+        403:
+          description: "update user error"
+          schema:
+            type: "object"
+            properties:
+              error:
+                type: "string"
     delete:
       tags:
-      - "admins"
+      - "user"
       summary: "Delete user"
       description: "This can only be done by the logged in user."
       operationId: "deleteUser"
@@ -158,14 +126,17 @@ paths:
         type: "string"
         x-exportParamName: "Username"
       responses:
-        400:
-          description: "Invalid username supplied"
-        404:
-          description: "User not found"
+        403:
+          description: "update user error"
+          schema:
+            type: "object"
+            properties:
+              error:
+                type: "string"
   /user:
     post:
       tags:
-      - "admins"
+      - "user"
       summary: "Create user"
       description: "This can only be done by the logged in user."
       operationId: "createUser"
@@ -184,55 +155,57 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/User"
-        400:
-          description: "Invalid username supplied"
-        404:
-          description: "User not found"
+        403:
+          description: "update user error"
+          schema:
+            type: "object"
+            properties:
+              error:
+                type: "string"
+securityDefinitions:
+  basicAuth:
+    type: "basic"
 definitions:
   User:
     type: "object"
     required:
-    - "password"
     - "username"
     properties:
       id:
-        type: "string"
-        example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        type: "integer"
+        example: 1
       username:
         type: "string"
-        example: "john"
+        example: "admin"
       password:
         type: "string"
-        example: "john"
+        example: "admin"
       email:
         type: "string"
-        example: "somebody@gmail.com"
+        example: "admin@admin.com"
       sub:
         type: "string"
-        example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        example: "1"
       name:
         type: "string"
-        example: "john"
+        example: "admin"
       preferred_username:
         type: "string"
-        example: "somebody"
+        example: "admin"
     example:
-      sub: "d290f1ee-6c54-4b01-90e6-d701748f0851"
-      password: "john"
-      name: "john"
-      id: "d290f1ee-6c54-4b01-90e6-d701748f0851"
-      preferred_username: "somebody"
-      email: "somebody@gmail.com"
-      username: "john"
+      sub: "1"
+      password: "admin"
+      name: "admin"
+      id: 1
+      preferred_username: "admin"
+      email: "admin@admin.com"
+      username: "admin"
   inline_response_401:
     properties:
       error:
         type: "string"
-        format: "uuid"
         description: "Authentication failed"
   inline_response_403:
     properties:
       error:
         type: "string"
-        format: "uuid"
-        description: "Internal error"

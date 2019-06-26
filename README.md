@@ -9,7 +9,7 @@
 
 ![](doc/img/api.png)
 
-详细接口信息可以使用项目内`swagger.yaml`文件在**swagger hub**中查看
+接口样例及详细信息可访问`your-domain/openshift-basic-identity-provider/1.0.0/api/`
 
 ### 数据表结构
 
@@ -112,5 +112,5 @@ type User struct {
 - [x] 数据库字段加密
 - [x] ansible 部署
 - [ ] api认证
-- [ ] swagger ui 显示api详情
+- [x] swagger ui 显示api详情
 
