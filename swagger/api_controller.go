@@ -22,12 +22,12 @@ import (
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	//w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("%s", err)
-		w.WriteHeader(http.StatusForbidden)
-		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
+		helper.ResponseWithJson(w, http.StatusBadRequest,
+			helper.Response{Code: http.StatusBadRequest, Msg: "bad params"})
 		return
 	}
 	bodyString := string(bodyBytes)
@@ -36,31 +36,27 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	userinfo.Password=db.AesEncrypt(userinfo.Password, *db.SALT_KEY)
 	if err:=db.DB.Save(&userinfo); err != nil{
 		log.Printf("%s", err)
-		w.WriteHeader(http.StatusForbidden)
-		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
-		return
-		}
-	w.WriteHeader(http.StatusOK)
-	userinfo.Password=""
-	execStatus, err := w.Write(helper.MarshaUp(userinfo))
-	if err != nil {
-		w.WriteHeader(execStatus)
-		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
+		helper.ResponseWithJson(w, http.StatusInternalServerError,
+			helper.Response{Code: http.StatusInternalServerError, Msg: "internal error"})
 		return
 	}
+	w.WriteHeader(http.StatusOK)
+	userinfo.Password=""
+	helper.ResponseWithJson(w, http.StatusOK,
+		helper.Response{Code: http.StatusOK, Data: userinfo})
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	temp := strings.Split(r.URL.Path, "/")
 	username := temp[len(temp)-1]
 
 	if err:= db.DB.Delete(&db.User{}, "username=?", username); err != nil {
 		log.Printf("%s", err)
-		w.WriteHeader(http.StatusForbidden)
-		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
+		helper.ResponseWithJson(w, http.StatusInternalServerError,
+			helper.Response{Code: http.StatusInternalServerError, Msg: "internal error"})
 		return
 	}
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -72,20 +68,16 @@ func ListUsers(w http.ResponseWriter, r *http.Request) {
 	//query
 	if err:= db.DB.Find(&users); err != nil && err.Error() != "record not found"{
 		log.Printf("%s", err)
-		w.WriteHeader(http.StatusForbidden)
-		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
+		helper.ResponseWithJson(w, http.StatusInternalServerError,
+			helper.Response{Code: http.StatusInternalServerError, Msg: "internal error"})
 		return
 	}
 	for index := range users{
 		users[index].Password=""
 	}
-	w.WriteHeader(http.StatusOK)
-	execStatus, err := w.Write(helper.MarshaUp(users))
-	if err != nil {
-		w.WriteHeader(execStatus)
-		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
-		return
-	}
+
+	helper.ResponseWithJson(w, http.StatusOK,
+		helper.Response{Code: http.StatusOK, Data: users})
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -100,14 +92,13 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	if err:= db.DB.Find(&userinfo, "username =? and password=?",userAndPassword[0],userAndPassword[1]); err != nil{
 		log.Printf("%s", err)
-		w.WriteHeader(http.StatusUnauthorized)
-		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
+		helper.ResponseWithJson(w, http.StatusNotFound,
+			helper.Response{Code: http.StatusNotFound, Msg: "the user not exist"})
 		return
 	}
 	token, _ := GenerateToken(&userinfo)
 	helper.ResponseWithJson(w, http.StatusOK,
 		helper.Response{Code: http.StatusOK, Data: JwtToken{Token: token}})
-
 }
 
 func LoginForOpenshift(w http.ResponseWriter, r *http.Request) {
@@ -149,8 +140,8 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("%s", err)
-		w.WriteHeader(http.StatusForbidden)
-		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
+		helper.ResponseWithJson(w, http.StatusBadRequest,
+			helper.Response{Code: http.StatusBadRequest, Msg: "bad params"})
 		return
 	}
 	bodyString := string(bodyBytes)
@@ -160,8 +151,8 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	userinfo.Password=db.AesEncrypt(userinfo.Password, *db.SALT_KEY)
 	if err := db.DB.Update(&userinfo, "username=?", username); err != nil {
 		log.Printf("%s", err)
-		w.WriteHeader(http.StatusForbidden)
-		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
+		helper.ResponseWithJson(w, http.StatusInternalServerError,
+			helper.Response{Code: http.StatusInternalServerError, Msg: "internal error"})
 		return
   }
 	w.WriteHeader(http.StatusOK)
