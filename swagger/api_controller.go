@@ -33,6 +33,13 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	bodyString := string(bodyBytes)
 	var userinfo db.User
 	helper.UnmarshaUp(bodyString, &userinfo)
+
+	if userinfo.Password == "" {
+		helper.ResponseWithJson(w, http.StatusBadRequest,
+			helper.Response{Code: http.StatusBadRequest, Msg: "bad params"})
+		return
+	}
+
 	userinfo.Password=db.AesEncrypt(userinfo.Password, *db.SALT_KEY)
 	if err:=db.DB.Save(&userinfo); err != nil{
 		log.Printf("%s", err)
@@ -40,7 +47,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 			helper.Response{Code: http.StatusInternalServerError, Msg: "internal error"})
 		return
 	}
-	w.WriteHeader(http.StatusOK)
+	//w.WriteHeader(http.StatusOK)
 	userinfo.Password=""
 	helper.ResponseWithJson(w, http.StatusOK,
 		helper.Response{Code: http.StatusOK, Data: userinfo})

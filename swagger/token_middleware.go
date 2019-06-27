@@ -11,9 +11,15 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
+
+type MyCustomClaims struct {
+    User string `json:"username"`
+    jwt.StandardClaims
+}
+
 func GenerateToken(user *db.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": user.Username,
+		"user": user.Username,
 		"exp":      time.Now().Add(time.Hour * 1).Unix(),
 	})
 
@@ -27,7 +33,7 @@ func TokenMiddleware(next http.Handler) http.Handler {
 			helper.ResponseWithJson(w, http.StatusUnauthorized,
 				helper.Response{Code: http.StatusUnauthorized, Msg: "not authorized"})
 		} else {
-			token, _ := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+			token, _ := jwt.ParseWithClaims(tokenStr, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 					helper.ResponseWithJson(w, http.StatusUnauthorized,
 						helper.Response{Code: http.StatusUnauthorized, Msg: "not authorized"})
@@ -39,6 +45,9 @@ func TokenMiddleware(next http.Handler) http.Handler {
 				helper.ResponseWithJson(w, http.StatusUnauthorized,
 					helper.Response{Code: http.StatusUnauthorized, Msg: "not authorized"})
 			} else {
+				claims, ok := token.Claims.(*MyCustomClaims)
+				user := claims.User
+				r.Header.Set("user",user)
 				next.ServeHTTP(w, r)
 			}
 		}
