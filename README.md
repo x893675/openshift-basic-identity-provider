@@ -5,9 +5,11 @@
 
 ## API
 
-以下是目前支持的api
+以下是目前支持的api(图片未更新)
 
 ![](doc/img/api.png)
+
+### swagger ui
 
 接口样例及详细信息可访问`your-domain/openshift-basic-identity-provider/1.0.0/api/`
 
@@ -30,6 +32,14 @@ type User struct {
 	PreferredUsername string `json:"preferred_username,omitempty"gorm:"-"`
 }
 ```
+
+### api 认证授权
+
+除登录接口外，对用户的CURD操作均需先登录
+
+`auth/token`登录接口采用basic认证，认证成功后返回一个`token`，访问其他api时需要在`request header`中添加`Authorization:yourtoken`
+
+目前CURD操作均需要admin用户的权限,后续进行细分
 
 ## how to start
 
@@ -54,7 +64,7 @@ type User struct {
       provider:
         apiVersion: v1
         kind: BasicAuthPasswordIdentityProvider
-        url: https://basic-identity--myproject.openstack-vm2-apps.demotheworld.com/openshift-basic-identity-provider/1.0.0/auth/token
+        url: https://basic-identity--myproject.openstack-vm2-apps.demotheworld.com/openshift-basic-identity-provider/1.0.0/auth
         ca: /etc/origin/master/custom_auth/ca.crt
         certFile: /etc/origin/master/custom_auth/admin.crt
         keyFile: /etc/origin/master/custom_auth/admin.key
@@ -105,12 +115,12 @@ type User struct {
   `curl -X DELETE "http://yourdomain/openshift-basic-identity-provider/1.0.0/user/john" -H "accept: application/json"`
 
 
-### to do list
+## to do list
 
 - [x] 错误处理及返回
-- [ ] 统一日志输出
 - [x] 数据库字段加密
 - [x] ansible 部署
-- [ ] api认证
+- [x] api认证
 - [x] swagger ui 显示api详情
-
+- [ ] 统一日志输出
+- [ ] api权限细分
