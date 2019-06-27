@@ -14,7 +14,6 @@ import (
 	"encoding/base64"
 	"io/ioutil"
 	"log"
-	"fmt"
 	"net/http"
 	"openshift-basic-identity-provider/db"
 	"openshift-basic-identity-provider/helper"
@@ -81,7 +80,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 func ListUsers(w http.ResponseWriter, r *http.Request) {
 	//w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	fmt.Println(r.Header["Isadmin"][0])
+	//fmt.Println(r.Header["Isadmin"][0])
 
 	if r.Header["Isadmin"][0] != "admin" {
 		helper.ResponseWithJson(w, http.StatusForbidden,
