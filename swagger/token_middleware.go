@@ -4,6 +4,7 @@ package swagger
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"openshift-basic-identity-provider/helper"
 	"openshift-basic-identity-provider/db"
@@ -12,8 +13,8 @@ import (
 
 func GenerateToken(user *db.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": user.UserName,
-		//"exp":      time.Now().Add(time.Hour * 2).Unix(),
+		"username": user.Username,
+		"exp":      time.Now().Add(time.Hour * 1).Unix(),
 	})
 
 	return token.SignedString([]byte("secret"))
