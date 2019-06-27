@@ -106,7 +106,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 	token, _ := GenerateToken(&userinfo)
 	helper.ResponseWithJson(w, http.StatusOK,
-		helper.Response{Code: http.StatusOK, Data: models.JwtToken{Token: token}})
+		helper.Response{Code: http.StatusOK, Data: JwtToken{Token: token}})
 
 	// userinfo.Password=""
 	// userinfo.Sub = string(userinfo.ID)
