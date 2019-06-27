@@ -47,7 +47,7 @@ func TokenMiddleware(next http.Handler) http.Handler {
 			} else {
 				claims, _:= token.Claims.(*MyCustomClaims)
 				user := claims.User
-				fmt.Println(user)
+				//fmt.Println(user)
 				r.Header.Add("isadmin",user)
 				next.ServeHTTP(w, r)
 			}

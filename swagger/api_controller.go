@@ -22,6 +22,11 @@ import (
 )
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
+	if r.Header["Isadmin"][0] != "admin" {
+		helper.ResponseWithJson(w, http.StatusForbidden,
+			helper.Response{Code: http.StatusForbidden, Msg: "permission denied"})
+		return
+	}
 
 	//w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	bodyBytes, err := ioutil.ReadAll(r.Body)
@@ -55,6 +60,11 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
+	if r.Header["Isadmin"][0] != "admin" {
+		helper.ResponseWithJson(w, http.StatusForbidden,
+			helper.Response{Code: http.StatusForbidden, Msg: "permission denied"})
+		return
+	}
 	temp := strings.Split(r.URL.Path, "/")
 	username := temp[len(temp)-1]
 
@@ -70,8 +80,14 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 
 func ListUsers(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	//w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	fmt.Println(r.Header["Isadmin"][0])
+
+	if r.Header["Isadmin"][0] != "admin" {
+		helper.ResponseWithJson(w, http.StatusForbidden,
+			helper.Response{Code: http.StatusForbidden, Msg: "permission denied"})
+		return
+	}
 
 	users := []db.User{}
 	//query
@@ -90,7 +106,7 @@ func ListUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	//w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	var userinfo db.User
 
@@ -143,7 +159,12 @@ func LoginForOpenshift(w http.ResponseWriter, r *http.Request) {
 
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	//w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	if r.Header["Isadmin"][0] != "admin" {
+		helper.ResponseWithJson(w, http.StatusForbidden,
+			helper.Response{Code: http.StatusForbidden, Msg: "permission denied"})
+		return
+	}
 	temp := strings.Split(r.URL.Path, "/")
 	username := temp[len(temp)-1]
 	bodyBytes, err := ioutil.ReadAll(r.Body)
