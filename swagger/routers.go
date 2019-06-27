@@ -25,6 +25,7 @@ type Route struct {
 	Method      string
 	Pattern     string
 	HandlerFunc http.HandlerFunc
+	Middleware mux.MiddlewareFunc
 }
 
 type Routes []Route
@@ -44,13 +45,20 @@ func NewRouter() *mux.Router {
 		handler = route.HandlerFunc
 		handler = Logger(handler, route.Name)
 
-		router.
+		if route.Middleware != nil{
+			router.
+				Methods(route.Method).
+				Path(route.Pattern).
+				Name(route.Name).
+				Handler(route.Middleware(handler))
+		} else{
+			router.
 			Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(handler)
+		}
 	}
-
 	return router
 }
 
@@ -64,6 +72,7 @@ var routes = Routes{
 		strings.ToUpper("Post"),
 		"/openshift-basic-identity-provider/1.0.0/user",
 		CreateUser,
+		TokenMiddleware,
 	},
 
 	Route{
@@ -71,6 +80,7 @@ var routes = Routes{
 		strings.ToUpper("Delete"),
 		"/openshift-basic-identity-provider/1.0.0/user/{username}",
 		DeleteUser,
+		TokenMiddleware,
 	},
 
 	// Route{
@@ -85,6 +95,7 @@ var routes = Routes{
 		strings.ToUpper("Get"),
 		"/openshift-basic-identity-provider/1.0.0/users",
 		ListUsers,
+		TokenMiddleware,
 	},
 
 	Route{
@@ -92,6 +103,7 @@ var routes = Routes{
 		strings.ToUpper("Get"),
 		"/openshift-basic-identity-provider/1.0.0/auth/token",
 		Login,
+		nil,
 	},
 
 	Route{
@@ -99,5 +111,6 @@ var routes = Routes{
 		strings.ToUpper("Put"),
 		"/openshift-basic-identity-provider/1.0.0/user/{username}",
 		UpdateUser,
+		TokenMiddleware,
 	},
 }

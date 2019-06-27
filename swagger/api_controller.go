@@ -104,18 +104,22 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
 	}
-	userinfo.Password=""
-	userinfo.Sub = string(userinfo.ID)
-	userinfo.PreferredUsername = userinfo.Name
-	userinfo.Username = ""
-	w.WriteHeader(http.StatusOK)
-	execStatus, err := w.Write(helper.MarshaUp(userinfo))
-	if err != nil {
-		w.WriteHeader(execStatus)
-		// ignore error
-		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
-		return
-	}
+	token, _ := GenerateToken(&userinfo)
+	helper.ResponseWithJson(w, http.StatusOK,
+		helper.Response{Code: http.StatusOK, Data: models.JwtToken{Token: token}})
+
+	// userinfo.Password=""
+	// userinfo.Sub = string(userinfo.ID)
+	// userinfo.PreferredUsername = userinfo.Name
+	// userinfo.Username = ""
+	// w.WriteHeader(http.StatusOK)
+	// execStatus, err := w.Write(helper.MarshaUp(userinfo))
+	// if err != nil {
+	// 	w.WriteHeader(execStatus)
+	// 	// ignore error
+	// 	_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
+	// 	return
+	// }
 }
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
