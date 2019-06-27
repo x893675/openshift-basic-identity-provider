@@ -107,6 +107,14 @@ var routes = Routes{
 	},
 
 	Route{
+		"LoginForOpenshift",
+		strings.ToUpper("Get"),
+		"/openshift-basic-identity-provider/1.0.0/auth",
+		LoginForOpenshift,
+		nil,
+	},
+
+	Route{
 		"UpdateUser",
 		strings.ToUpper("Put"),
 		"/openshift-basic-identity-provider/1.0.0/user/{username}",

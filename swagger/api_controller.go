@@ -108,19 +108,39 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	helper.ResponseWithJson(w, http.StatusOK,
 		helper.Response{Code: http.StatusOK, Data: models.JwtToken{Token: token}})
 
-	// userinfo.Password=""
-	// userinfo.Sub = string(userinfo.ID)
-	// userinfo.PreferredUsername = userinfo.Name
-	// userinfo.Username = ""
-	// w.WriteHeader(http.StatusOK)
-	// execStatus, err := w.Write(helper.MarshaUp(userinfo))
-	// if err != nil {
-	// 	w.WriteHeader(execStatus)
-	// 	// ignore error
-	// 	_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
-	// 	return
-	// }
 }
+
+func LoginForOpenshift(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	var userinfo db.User
+
+	auth := strings.Replace(r.Header["Authorization"][0],"Basic ", "", 1)
+	credential, _ := base64.StdEncoding.DecodeString(auth)
+	userAndPassword := strings.Split(string(credential), ":")
+	userAndPassword[1] = db.AesEncrypt(userAndPassword[1], *db.SALT_KEY)
+
+	if err:= db.DB.Find(&userinfo, "username =? and password=?",userAndPassword[0],userAndPassword[1]); err != nil{
+		log.Printf("%s", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
+		return
+	}
+
+	userinfo.Password=""
+	userinfo.Sub = string(userinfo.ID)
+	userinfo.PreferredUsername = userinfo.Name
+	userinfo.Username = ""
+	w.WriteHeader(http.StatusOK)
+	execStatus, err := w.Write(helper.MarshaUp(userinfo))
+	if err != nil {
+		w.WriteHeader(execStatus)
+		// ignore error
+		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
+		return
+	}
+}
+
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
