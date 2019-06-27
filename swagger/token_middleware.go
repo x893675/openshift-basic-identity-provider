@@ -13,7 +13,7 @@ import (
 
 
 type MyCustomClaims struct {
-    User string `json:"username"`
+    User string `json:"user"`
     jwt.StandardClaims
 }
 
@@ -45,9 +45,10 @@ func TokenMiddleware(next http.Handler) http.Handler {
 				helper.ResponseWithJson(w, http.StatusUnauthorized,
 					helper.Response{Code: http.StatusUnauthorized, Msg: "not authorized"})
 			} else {
-				claims, ok := token.Claims.(*MyCustomClaims)
+				claims, _:= token.Claims.(*MyCustomClaims)
 				user := claims.User
-				r.Header.Set("user",user)
+				fmt.Println(user)
+				r.Header.Add("isadmin",user)
 				next.ServeHTTP(w, r)
 			}
 		}
