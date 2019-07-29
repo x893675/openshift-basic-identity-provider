@@ -46,8 +46,8 @@ func main() {
 
 func initTable() {
 	admin := db.User{Username: "admin", Password: db.AesEncrypt("admin", *db.SALT_KEY), Email: "admin@admin.com", Name: "admin", Role: 1}
-	developer := db.User{Username: "developer", Password: db.AesEncrypt("developer", *db.SALT_KEY), Email: "developer@developer.com", Name: "developer", Role: 0}
-	operator := db.User{Username: "operator", Password: db.AesEncrypt("operator", *db.SALT_KEY), Email: "operator@operator.com", Name: "operator", Role: 0}
+	developer := db.User{Username: "developer", Password: db.AesEncrypt("developer", *db.SALT_KEY), Email: "developer@developer.com", Name: "developer", Role: 2}
+	operator := db.User{Username: "operator", Password: db.AesEncrypt("operator", *db.SALT_KEY), Email: "operator@operator.com", Name: "operator", Role: 2}
 	_ = db.DB.Save(&admin)
 	_ = db.DB.Save(&developer)
 	_ = db.DB.Save(&operator)

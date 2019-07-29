@@ -18,6 +18,8 @@ type MyCustomClaims struct {
 }
 
 func GenerateToken(user *db.User) (string, error) {
+	fmt.Println(user.Username)
+	fmt.Println(user.Role)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user": user.Username,
 		"role": user.Role,
@@ -49,12 +51,14 @@ func TokenMiddleware(next http.Handler) http.Handler {
 				claims, _ := token.Claims.(*MyCustomClaims)
 				user := claims.User
 				role := claims.Role
+				fmt.Println(user)
+				fmt.Println(role)
 				if role == 1 {
 					r.Header.Add("role", "admin")
 				} else {
 					r.Header.Add("role", "common")
 				}
-				//fmt.Println(user)
+				fmt.Println(r.Header)
 
 				r.Header.Add("username", user)
 				next.ServeHTTP(w, r)

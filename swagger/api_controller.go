@@ -12,6 +12,7 @@ package swagger
 
 import (
 	"encoding/base64"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -21,7 +22,7 @@ import (
 )
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
-	if r.Header["role"][0] != "admin" {
+	if r.Header["Role"][0] != "admin" {
 		helper.ResponseWithJson(w, http.StatusForbidden,
 			helper.Response{Code: http.StatusForbidden, Msg: "permission denied"})
 		return
@@ -59,7 +60,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
-	if r.Header["role"][0] != "admin" {
+	if r.Header["Role"][0] != "admin" {
 		helper.ResponseWithJson(w, http.StatusForbidden,
 			helper.Response{Code: http.StatusForbidden, Msg: "permission denied"})
 		return
@@ -81,7 +82,7 @@ func ListUsers(w http.ResponseWriter, r *http.Request) {
 	//w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	//fmt.Println(r.Header["Isadmin"][0])
 
-	if r.Header["role"][0] != "admin" {
+	if r.Header["Role"][0] != "admin" {
 		helper.ResponseWithJson(w, http.StatusForbidden,
 			helper.Response{Code: http.StatusForbidden, Msg: "permission denied"})
 		return
@@ -96,6 +97,7 @@ func ListUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	for index := range users {
+		fmt.Println(users[index].Role)
 		users[index].Password = ""
 	}
 
@@ -157,7 +159,7 @@ func LoginForOpenshift(w http.ResponseWriter, r *http.Request) {
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	//w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	if r.Header["role"][0] != "admin" {
+	if r.Header["Role"][0] != "admin" {
 		helper.ResponseWithJson(w, http.StatusForbidden,
 			helper.Response{Code: http.StatusForbidden, Msg: "permission denied"})
 		return
@@ -175,7 +177,12 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	var userinfo db.User
 	helper.UnmarshaUp(bodyString, &userinfo)
 
-	userinfo.Password = db.AesEncrypt(userinfo.Password, *db.SALT_KEY)
+	if userinfo.Password != "" {
+		userinfo.Password = db.AesEncrypt(userinfo.Password, *db.SALT_KEY)
+	}
+
+	fmt.Println(username)
+
 	if err := db.DB.Update(&userinfo, "username=?", username); err != nil {
 		log.Printf("%s", err)
 		helper.ResponseWithJson(w, http.StatusInternalServerError,
@@ -187,7 +194,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 func UserInfo(w http.ResponseWriter, r *http.Request) {
 
-	username := r.Header["user"][0]
+	username := r.Header["Username"][0]
 
 	user := db.User{}
 	//query
@@ -204,7 +211,7 @@ func UserInfo(w http.ResponseWriter, r *http.Request) {
 }
 
 func ResetPassword(w http.ResponseWriter, r *http.Request) {
-	username := r.Header["user"][0]
+	username := r.Header["Username"][0]
 
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {

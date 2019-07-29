@@ -15,7 +15,7 @@ type User struct {
 
 	PreferredUsername string `json:"preferred_username,omitempty" gorm:"-"`
 
-	Role uint `json:"role,omitempty" gorm:"column:role"` //1 is admin , 0 is common user
+	Role uint `json:"role,omitempty" gorm:"column:role"` //1 is admin , 2 is common user
 }
 
 type UpdatePassword struct {
