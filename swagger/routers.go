@@ -138,4 +138,20 @@ var routes = Routes{
 		ResetPassword,
 		TokenMiddleware,
 	},
+
+	Route{
+		"SendResetPasswordMail",
+		strings.ToUpper("POST"),
+		"/openshift-basic-identity-provider/1.0.0/reset/sendmail",
+		SendResetPasswordMail,
+		nil,
+	},
+
+	Route{
+		"MailResetPassword",
+		strings.ToUpper("POST"),
+		"/openshift-basic-identity-provider/1.0.0/reset/verify/{id:[0-9]+}/{secret}",
+		MailResetPassword,
+		nil,
+	},
 }

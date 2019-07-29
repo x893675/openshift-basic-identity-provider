@@ -18,7 +18,11 @@ import (
 	"net/http"
 	"openshift-basic-identity-provider/db"
 	"openshift-basic-identity-provider/helper"
+	"openshift-basic-identity-provider/mail"
 	"strings"
+	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -198,10 +202,10 @@ func UserInfo(w http.ResponseWriter, r *http.Request) {
 
 	user := db.User{}
 	//query
-	if err := db.DB.Find(&user, "username =?", username); err != nil && err.Error() != "record not found" {
+	if err := db.DB.Find(&user, "username =?", username); err != nil {
 		log.Printf("%s", err)
 		helper.ResponseWithJson(w, http.StatusInternalServerError,
-			helper.Response{Code: http.StatusInternalServerError, Msg: "internal error"})
+			helper.Response{Code: http.StatusInternalServerError, Msg: err.Error()})
 		return
 	}
 	user.Password = ""
@@ -226,10 +230,10 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	user := db.User{}
 	//query
-	if err := db.DB.Find(&user, "username =?", username); err != nil && err.Error() != "record not found" {
+	if err := db.DB.Find(&user, "username =?", username); err != nil {
 		log.Printf("%s", err)
 		helper.ResponseWithJson(w, http.StatusInternalServerError,
-			helper.Response{Code: http.StatusInternalServerError, Msg: "internal error"})
+			helper.Response{Code: http.StatusInternalServerError, Msg: err.Error()})
 		return
 	}
 
@@ -248,4 +252,110 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+func SendResetPasswordMail(w http.ResponseWriter, r *http.Request) {
+	bodyBytes, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("%s", err)
+		helper.ResponseWithJson(w, http.StatusBadRequest,
+			helper.Response{Code: http.StatusBadRequest, Msg: "bad params"})
+		return
+	}
+	bodyString := string(bodyBytes)
+	var userEmailParam db.UserEmailParam
+	helper.UnmarshaUp(bodyString, &userEmailParam)
+	user := db.User{}
+	if err := db.DB.Find(&user, "email =?", userEmailParam.Email); err != nil {
+		log.Printf("%s", err)
+		helper.ResponseWithJson(w, http.StatusInternalServerError,
+			helper.Response{Code: http.StatusInternalServerError, Msg: "the user not exist"})
+		return
+	}
+
+	go func() {
+		sendMail(&user, "修改密码")
+	}()
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func MailResetPassword(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	secret := db.UrlAesDecrypt(vars["secret"], *db.SALT_KEY)
+	fmt.Println(id)
+	fmt.Println(secret)
+
+	bodyBytes, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("%s", err)
+		helper.ResponseWithJson(w, http.StatusBadRequest,
+			helper.Response{Code: http.StatusBadRequest, Msg: "bad params"})
+		return
+	}
+	bodyString := string(bodyBytes)
+	var resetpw db.MailResetPassword
+	helper.UnmarshaUp(bodyString, &resetpw)
+
+	emailTs := strings.Split(secret, "-")
+	exp, _ := helper.S(emailTs[0]).Int64()
+	now := time.Now().Unix()
+	if VerifyExpiresAt(exp, now, false) == false {
+		log.Printf("邮箱链接已失效!")
+		helper.ResponseWithJson(w, http.StatusBadRequest,
+			helper.Response{Code: http.StatusBadRequest, Msg: "邮箱链接已失效!"})
+		return
+	}
+
+	user := db.User{}
+	if err := db.DB.Find(&user, "id =?", id); err != nil {
+		log.Printf("%s", err)
+		helper.ResponseWithJson(w, http.StatusInternalServerError,
+			helper.Response{Code: http.StatusInternalServerError, Msg: err.Error()})
+		return
+	}
+	if user.Email != emailTs[1] {
+		helper.ResponseWithJson(w, http.StatusInternalServerError,
+			helper.Response{Code: http.StatusInternalServerError, Msg: "用户id与email不匹配"})
+		return
+	}
+
+	user.Password = db.AesEncrypt(resetpw.Password, *db.SALT_KEY)
+	if err := db.DB.Update(&user, "id=?", id); err != nil {
+		log.Printf("%s", err)
+		helper.ResponseWithJson(w, http.StatusInternalServerError,
+			helper.Response{Code: http.StatusInternalServerError, Msg: err.Error()})
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func sendMail(user *db.User, title string) {
+	exp := time.Now().Add(time.Minute * 30).Unix()
+	secretstr := fmt.Sprintf("%d-%s", exp, user.Email)
+	fmt.Println(secretstr)
+	secretstr = db.UrlAesEncrypt(secretstr, *db.SALT_KEY)
+	fmt.Println(secretstr)
+	url := fmt.Sprintf("/openshift-basic-identity-provider/1.0.0/reset/verify"+"/%d/%s", user.ID, secretstr)
+	fmt.Println(url)
+
+	content := "<p><b>亲爱的" + user.Username + ":</b></p>" +
+		"<p>你的密码重设要求已经得到验证。请使用以下api接口重置你的密码，body以{\"password: yourpassword\"}的形式传入新密码! 有效时间为30分钟</p>" +
+		"<a href=\"" + url + "\">" + url + "</a>" +
+		"<p>感谢你对 99cloud 的支持，希望你在 99cloud-CaaS 的体验有益且愉快。</p>" +
+		"<p>(这是一封自动产生的email，请勿回复。)</p>"
+
+	mail.SendMail(user.Email, title, content)
+}
+
+func VerifyExpiresAt(exp int64, cmp int64, req bool) bool {
+	return verifyExp(exp, cmp, req)
+}
+
+func verifyExp(exp int64, now int64, required bool) bool {
+	if exp == 0 {
+		return !required
+	}
+	return now <= exp
 }

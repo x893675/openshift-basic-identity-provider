@@ -22,3 +22,11 @@ type UpdatePassword struct {
 	OldPassword string `json:"old_password"`
 	NewPassword string `json:"new_password"`
 }
+
+type UserEmailParam struct {
+	Email string `json:"email"`
+}
+
+type MailResetPassword struct {
+	Password string `json:"password"`
+}

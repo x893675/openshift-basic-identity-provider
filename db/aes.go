@@ -74,3 +74,44 @@ func PKCS7UnPadding(origData []byte) []byte {
 //     decryptCode := AesDecrypt(encryptCode, key)
 //     fmt.Println("解密结果：", decryptCode)
 // }
+
+func UrlAesEncrypt(orig string, key string) string {
+	// 转成字节数组
+	origData := []byte(orig)
+	k := []byte(key)
+
+	// 分组秘钥
+	block, _ := aes.NewCipher(k)
+	// 获取秘钥块的长度
+	blockSize := block.BlockSize()
+	// 补全码
+	origData = PKCS7Padding(origData, blockSize)
+	// 加密模式
+	blockMode := cipher.NewCBCEncrypter(block, k[:blockSize])
+	// 创建数组
+	cryted := make([]byte, len(origData))
+	// 加密
+	blockMode.CryptBlocks(cryted, origData)
+
+	return base64.RawURLEncoding.EncodeToString(cryted)
+}
+
+func UrlAesDecrypt(cryted string, key string) string {
+	// 转成字节数组
+	crytedByte, _ := base64.RawURLEncoding.DecodeString(cryted)
+	k := []byte(key)
+
+	// 分组秘钥
+	block, _ := aes.NewCipher(k)
+	// 获取秘钥块的长度
+	blockSize := block.BlockSize()
+	// 加密模式
+	blockMode := cipher.NewCBCDecrypter(block, k[:blockSize])
+	// 创建数组
+	orig := make([]byte, len(crytedByte))
+	// 解密
+	blockMode.CryptBlocks(orig, crytedByte)
+	// 去补全码
+	orig = PKCS7UnPadding(orig)
+	return string(orig)
+}
