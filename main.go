@@ -22,6 +22,7 @@ import (
 	//
 	"openshift-basic-identity-provider/db"
 	sw "openshift-basic-identity-provider/swagger"
+
 	log "github.com/sirupsen/logrus"
 )
 
@@ -33,9 +34,9 @@ func main() {
 	db.DB = &db.CRDB{DBLink: db.ConnectDB()}
 	defer db.DB.Close()
 	if err := db.DB.CreateTable(&db.User{}); err != nil {
-                log.Error("create table user_ failed.", err)
-                return
-        }
+		log.Error("create table user_ failed.", err)
+		return
+	}
 
 	initTable()
 	//crt, key := "/etc/origin/master/custom_auth/admin.crt", "/etc/origin/master/custom_auth/admin.key"
@@ -43,11 +44,10 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
-
-func initTable(){
-	admin := db.User{Username: "admin",Password: db.AesEncrypt("admin", *db.SALT_KEY),Email: "admin@admin.com",Name: "admin"}
-	developer := db.User{Username: "developer",Password: db.AesEncrypt("developer", *db.SALT_KEY),Email: "developer@developer.com",Name: "developer"}
-	operator := db.User{Username: "operator",Password: db.AesEncrypt("operator", *db.SALT_KEY),Email: "operator@operator.com",Name: "operator"}
+func initTable() {
+	admin := db.User{Username: "admin", Password: db.AesEncrypt("admin", *db.SALT_KEY), Email: "admin@admin.com", Name: "admin", Role: 1}
+	developer := db.User{Username: "developer", Password: db.AesEncrypt("developer", *db.SALT_KEY), Email: "developer@developer.com", Name: "developer", Role: 0}
+	operator := db.User{Username: "operator", Password: db.AesEncrypt("operator", *db.SALT_KEY), Email: "operator@operator.com", Name: "operator", Role: 0}
 	_ = db.DB.Save(&admin)
 	_ = db.DB.Save(&developer)
 	_ = db.DB.Save(&operator)

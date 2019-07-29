@@ -15,9 +15,10 @@ import (
 	"net/http"
 	"strings"
 
+	_ "openshift-basic-identity-provider/statik"
+
 	"github.com/gorilla/mux"
 	"github.com/rakyll/statik/fs"
-	_ "openshift-basic-identity-provider/statik"
 )
 
 type Route struct {
@@ -25,7 +26,7 @@ type Route struct {
 	Method      string
 	Pattern     string
 	HandlerFunc http.HandlerFunc
-	Middleware mux.MiddlewareFunc
+	Middleware  mux.MiddlewareFunc
 }
 
 type Routes []Route
@@ -45,18 +46,18 @@ func NewRouter() *mux.Router {
 		handler = route.HandlerFunc
 		handler = Logger(handler, route.Name)
 
-		if route.Middleware != nil{
+		if route.Middleware != nil {
 			router.
 				Methods(route.Method).
 				Path(route.Pattern).
 				Name(route.Name).
 				Handler(route.Middleware(handler))
-		} else{
+		} else {
 			router.
-			Methods(route.Method).
-			Path(route.Pattern).
-			Name(route.Name).
-			Handler(handler)
+				Methods(route.Method).
+				Path(route.Pattern).
+				Name(route.Name).
+				Handler(handler)
 		}
 	}
 	return router
@@ -119,6 +120,22 @@ var routes = Routes{
 		strings.ToUpper("Put"),
 		"/openshift-basic-identity-provider/1.0.0/user/{username}",
 		UpdateUser,
+		TokenMiddleware,
+	},
+
+	Route{
+		"UserInfo",
+		strings.ToUpper("GET"),
+		"/openshift-basic-identity-provider/1.0.0/current/user",
+		UserInfo,
+		TokenMiddleware,
+	},
+
+	Route{
+		"ResetPassword",
+		strings.ToUpper("POST"),
+		"/openshift-basic-identity-provider/1.0.0/current/resetpw",
+		ResetPassword,
 		TokenMiddleware,
 	},
 }

@@ -21,7 +21,7 @@ import (
 )
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
-	if r.Header["Isadmin"][0] != "admin" {
+	if r.Header["role"][0] != "admin" {
 		helper.ResponseWithJson(w, http.StatusForbidden,
 			helper.Response{Code: http.StatusForbidden, Msg: "permission denied"})
 		return
@@ -45,21 +45,21 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userinfo.Password=db.AesEncrypt(userinfo.Password, *db.SALT_KEY)
-	if err:=db.DB.Save(&userinfo); err != nil{
+	userinfo.Password = db.AesEncrypt(userinfo.Password, *db.SALT_KEY)
+	if err := db.DB.Save(&userinfo); err != nil {
 		log.Printf("%s", err)
 		helper.ResponseWithJson(w, http.StatusInternalServerError,
 			helper.Response{Code: http.StatusInternalServerError, Msg: "internal error"})
 		return
 	}
 	//w.WriteHeader(http.StatusOK)
-	userinfo.Password=""
+	userinfo.Password = ""
 	helper.ResponseWithJson(w, http.StatusOK,
 		helper.Response{Code: http.StatusOK, Data: userinfo})
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
-	if r.Header["Isadmin"][0] != "admin" {
+	if r.Header["role"][0] != "admin" {
 		helper.ResponseWithJson(w, http.StatusForbidden,
 			helper.Response{Code: http.StatusForbidden, Msg: "permission denied"})
 		return
@@ -67,7 +67,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	temp := strings.Split(r.URL.Path, "/")
 	username := temp[len(temp)-1]
 
-	if err:= db.DB.Delete(&db.User{}, "username=?", username); err != nil {
+	if err := db.DB.Delete(&db.User{}, "username=?", username); err != nil {
 		log.Printf("%s", err)
 		helper.ResponseWithJson(w, http.StatusInternalServerError,
 			helper.Response{Code: http.StatusInternalServerError, Msg: "internal error"})
@@ -77,12 +77,11 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-
 func ListUsers(w http.ResponseWriter, r *http.Request) {
 	//w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	//fmt.Println(r.Header["Isadmin"][0])
 
-	if r.Header["Isadmin"][0] != "admin" {
+	if r.Header["role"][0] != "admin" {
 		helper.ResponseWithJson(w, http.StatusForbidden,
 			helper.Response{Code: http.StatusForbidden, Msg: "permission denied"})
 		return
@@ -90,14 +89,14 @@ func ListUsers(w http.ResponseWriter, r *http.Request) {
 
 	users := []db.User{}
 	//query
-	if err:= db.DB.Find(&users); err != nil && err.Error() != "record not found"{
+	if err := db.DB.Find(&users); err != nil && err.Error() != "record not found" {
 		log.Printf("%s", err)
 		helper.ResponseWithJson(w, http.StatusInternalServerError,
 			helper.Response{Code: http.StatusInternalServerError, Msg: "internal error"})
 		return
 	}
-	for index := range users{
-		users[index].Password=""
+	for index := range users {
+		users[index].Password = ""
 	}
 
 	helper.ResponseWithJson(w, http.StatusOK,
@@ -109,12 +108,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	var userinfo db.User
 
-	auth := strings.Replace(r.Header["Authorization"][0],"Basic ", "", 1)
+	auth := strings.Replace(r.Header["Authorization"][0], "Basic ", "", 1)
 	credential, _ := base64.StdEncoding.DecodeString(auth)
 	userAndPassword := strings.Split(string(credential), ":")
 	userAndPassword[1] = db.AesEncrypt(userAndPassword[1], *db.SALT_KEY)
 
-	if err:= db.DB.Find(&userinfo, "username =? and password=?",userAndPassword[0],userAndPassword[1]); err != nil{
+	if err := db.DB.Find(&userinfo, "username =? and password=?", userAndPassword[0], userAndPassword[1]); err != nil {
 		log.Printf("%s", err)
 		helper.ResponseWithJson(w, http.StatusNotFound,
 			helper.Response{Code: http.StatusNotFound, Msg: "the user not exist"})
@@ -130,19 +129,19 @@ func LoginForOpenshift(w http.ResponseWriter, r *http.Request) {
 
 	var userinfo db.User
 
-	auth := strings.Replace(r.Header["Authorization"][0],"Basic ", "", 1)
+	auth := strings.Replace(r.Header["Authorization"][0], "Basic ", "", 1)
 	credential, _ := base64.StdEncoding.DecodeString(auth)
 	userAndPassword := strings.Split(string(credential), ":")
 	userAndPassword[1] = db.AesEncrypt(userAndPassword[1], *db.SALT_KEY)
 
-	if err:= db.DB.Find(&userinfo, "username =? and password=?",userAndPassword[0],userAndPassword[1]); err != nil{
+	if err := db.DB.Find(&userinfo, "username =? and password=?", userAndPassword[0], userAndPassword[1]); err != nil {
 		log.Printf("%s", err)
 		w.WriteHeader(http.StatusUnauthorized)
 		_, _ = w.Write(helper.MarshaUp(InlineResponse403{Error_: err.Error()}))
 		return
 	}
 
-	userinfo.Password=""
+	userinfo.Password = ""
 	userinfo.Sub = string(userinfo.ID)
 	userinfo.PreferredUsername = userinfo.Name
 	userinfo.Username = ""
@@ -156,10 +155,9 @@ func LoginForOpenshift(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	//w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	if r.Header["Isadmin"][0] != "admin" {
+	if r.Header["role"][0] != "admin" {
 		helper.ResponseWithJson(w, http.StatusForbidden,
 			helper.Response{Code: http.StatusForbidden, Msg: "permission denied"})
 		return
@@ -177,12 +175,70 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	var userinfo db.User
 	helper.UnmarshaUp(bodyString, &userinfo)
 
-	userinfo.Password=db.AesEncrypt(userinfo.Password, *db.SALT_KEY)
+	userinfo.Password = db.AesEncrypt(userinfo.Password, *db.SALT_KEY)
 	if err := db.DB.Update(&userinfo, "username=?", username); err != nil {
 		log.Printf("%s", err)
 		helper.ResponseWithJson(w, http.StatusInternalServerError,
 			helper.Response{Code: http.StatusInternalServerError, Msg: "internal error"})
 		return
-  }
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func UserInfo(w http.ResponseWriter, r *http.Request) {
+
+	username := r.Header["user"][0]
+
+	user := db.User{}
+	//query
+	if err := db.DB.Find(&user, "username =?", username); err != nil && err.Error() != "record not found" {
+		log.Printf("%s", err)
+		helper.ResponseWithJson(w, http.StatusInternalServerError,
+			helper.Response{Code: http.StatusInternalServerError, Msg: "internal error"})
+		return
+	}
+	user.Password = ""
+
+	helper.ResponseWithJson(w, http.StatusOK,
+		helper.Response{Code: http.StatusOK, Data: user})
+}
+
+func ResetPassword(w http.ResponseWriter, r *http.Request) {
+	username := r.Header["user"][0]
+
+	bodyBytes, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("%s", err)
+		helper.ResponseWithJson(w, http.StatusBadRequest,
+			helper.Response{Code: http.StatusBadRequest, Msg: "bad params"})
+		return
+	}
+	bodyString := string(bodyBytes)
+	var resetpw db.UpdatePassword
+	helper.UnmarshaUp(bodyString, &resetpw)
+
+	user := db.User{}
+	//query
+	if err := db.DB.Find(&user, "username =?", username); err != nil && err.Error() != "record not found" {
+		log.Printf("%s", err)
+		helper.ResponseWithJson(w, http.StatusInternalServerError,
+			helper.Response{Code: http.StatusInternalServerError, Msg: "internal error"})
+		return
+	}
+
+	if db.AesEncrypt(resetpw.OldPassword, *db.SALT_KEY) != user.Password {
+		helper.ResponseWithJson(w, http.StatusBadRequest,
+			helper.Response{Code: http.StatusBadRequest, Msg: "old password is not correct"})
+		return
+	}
+
+	user.Password = db.AesEncrypt(resetpw.NewPassword, *db.SALT_KEY)
+
+	if err := db.DB.Update(&user, "username=?", username); err != nil {
+		log.Printf("%s", err)
+		helper.ResponseWithJson(w, http.StatusInternalServerError,
+			helper.Response{Code: http.StatusInternalServerError, Msg: "internal error"})
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 }
